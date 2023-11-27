@@ -25,6 +25,7 @@ function VenueCreate() {
         let result = await val.json()
         document.getElementById("result").value = result.body
     }
+    
 
     fetchResult()
 }
