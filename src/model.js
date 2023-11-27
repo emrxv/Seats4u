@@ -26,6 +26,7 @@ export class Show {
     this.time = time
     this.blocks = blocks
     let totalSeats = seatsAvailable + seatsRemaining;
+    this.totalSeats = totalSeats
     }
 }
 

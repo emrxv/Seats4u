@@ -85,7 +85,6 @@ function App() {
             </div>
             <button style={layout.listVenuesButton} onClick={(e) => ListVenues()}>List Venues</button>
 
-
           </div>
         </div>
       </header>

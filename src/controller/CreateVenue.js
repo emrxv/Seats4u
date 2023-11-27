@@ -1,4 +1,4 @@
-function VenueCreate() {
+function CreateVenue() {
     let venuename = document.getElementById("venuecreatename").value;
     let location = document.getElementById("venuelocation").value;
     let sideleft = document.getElementById("sideleft").value;
