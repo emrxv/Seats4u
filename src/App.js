@@ -21,7 +21,7 @@ function App() {
             </div>
             <div style={layout.formRow}>
               <label style={layout.label}>Location:</label>
-              <input id = "venuelocation" style={layout.input} />
+              <input id = "venuelocation" style={layout.input}/>
             </div>
             <div style={layout.formRow}>
               <label style={layout.label}>Side Left:</label>
@@ -37,7 +37,7 @@ function App() {
             </div>
             <div style={layout.formRow}>
               <label style={layout.label}>Password:</label>
-              <input id = "managerpass" style={layout.input} />
+              <input id = "managerpass" type = "password" style={layout.input} />
             </div>
 
             <button style={layout.createVenueButton} onClick={(e) => CreateVenue()}>Create Venue</button>
@@ -47,7 +47,7 @@ function App() {
             </div>
             <div style={layout.formRow}>
               <label style={layout.label}>Password:</label>
-              <input id = "managerpass" style={layout.input} />
+              <input id = "managerpass" type = "password" style={layout.input} />
             </div>
             <button style={layout.deleteVenueButton} onClick={(e) => DeleteVenue()}>Delete Venue</button>
           </div>
@@ -74,14 +74,14 @@ function App() {
             </div>
             <div style={layout.formRow}>
               <label style={layout.label}>Password:</label>
-              <input id = "showcreatepass" style={layout.input} />
+              <input id = "showcreatepass" type = "password" style={layout.input} />
             </div>
             <button style={layout.createShowButton} onClick={(e) => CreateShow()}>Create Show</button>
           </div>
           <div style={layout.AdminColumn}>
             <div style={layout.formRow}>
               <label style={layout.label}>Password:</label>
-              <input id = "adminpass" style={layout.input} />
+              <input id = "adminpass" type = "password" style={layout.input} />
             </div>
             <button style={layout.listVenuesButton} onClick={(e) => ListVenues()}>List Venues</button>
 
