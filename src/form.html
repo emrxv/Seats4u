@@ -4,23 +4,21 @@ function CreateVenue(e) {
     let venueName = document.getElementById("venuecreatename").value;
     let location = document.getElementById("venuelocation").value;
     let managerPassword = document.getElementById("managerpass").value;
-    let sideleft = document.getElementById("sideleft").value;
-    let center = document.getElementById("center").value;
-    let sideright = document.getElementById("sideright").value;
     let layoutName = document.getElementById("layoutname").value;
 
-    let payload = {
-        "venuecreatename": venueName,
-        "venuelocation": location,
-        "managerpass": managerPassword,
-        "null" : adminPassword,
-        "layoutname": layoutName,
+    payload = {
+        "venueName": venueName,
+        "location": location,
+        "managerPassword": managerPassword,
+        "layoutName": layoutName,
     }
+
     const response = fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/createVenue",
-        {
-            method: "POST",
-            body: JSON.stringify(payload)
-        }).then((response) => response)
+    {
+        method: "POST",
+        body: JSON.stringify(payload)
+    }).then((response) => response)
+    console.log(response)
 
     const fetchResult = async () => {
         let val = await response
@@ -32,10 +30,6 @@ function CreateVenue(e) {
     fetchResult()
 }
 
-
-import './App.css';
-import { layout } from './Layout.js'
-import './model.js';
 </script>
 
 
@@ -64,14 +58,16 @@ import './model.js';
             <input id = "managerpass" type = "password"  />
           </div>
 
-          <button onClick="JavaScript:CreateVenue(event)">Create Venue</button>
+          <button onClick=CreateVenue(event)>Create Venue</button>
+          <div id="result">
+        </div>
           <div >
             <label >Name:</label>
             <input  id = "venuedeletename"/>
           </div>
           <div >
             <label >Password:</label>
-            <input id = "managerpass" type = "password"/>
+            <input id = "managerpass2" type = "password"/>
           </div>
           <button  onClick="JavaScript:DeleteVenue()">Delete Venue</button>
         </div>
