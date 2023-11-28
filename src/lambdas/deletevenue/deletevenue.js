@@ -1,0 +1,60 @@
+const mysql = require('mysql');
+const db_access = require('/opt/nodejs/db_access');
+
+exports.handler = async (event) => {
+    var pool = mysql.createPool({
+        host: db_access.config.host,
+        user: db_access.config.user,
+        password: db_access.config.password,
+        database: db_access.config.database
+    });
+
+    let DeleteVenue = () => {
+        return new Promise((resolve, reject) => {
+            pool.query("DELETE FROM Venue WHERE venueName = ? AND managerPassword = ?;", [event.venueName, event.managerPassword], (error, result) => { 
+                if (error) {
+                    return reject({
+                      statusCode: 500,
+                      body: JSON.stringify({ message: error.message })
+                    });
+                }
+                if (result.affectedRows === 0) {
+                    // Check if venueName was provided
+                    if (!event.venueName) {
+                        return reject({
+                            statusCode: 400,
+                            body: JSON.stringify({Error: "No venue name provided."})
+                        });
+                    }
+                    // Check if managerPassword was provided
+                    if (!event.managerPassword) {
+                        return reject({
+                            statusCode: 400,
+                            body: JSON.stringify({ Error: "No manager password provided." })
+                        });
+                    }
+                    // Venue name or password did not match
+                    return reject({
+                        statusCode: 400,
+                        body: JSON.stringify({ Error: "Incorrect venue name or manager password." })
+                    });
+                }
+                return resolve(result);
+            });
+        });
+    }
+
+    try {
+        const all_constants = await DeleteVenue();
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: 'Venue deleted successfully.', constants: all_constants })
+        };
+    } catch (errorResponse) {
+        // Return the error response from the rejected promise
+        return {
+            statusCode: errorResponse.statusCode,
+            body: errorResponse.body
+        };
+    }
+};

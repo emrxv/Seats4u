@@ -1,142 +1,212 @@
-<html> <body>
+<html>
+
+<body>
     <script type="text/javascript">
-function CreateVenue(e) {
 
-    let venueName = document.getElementById("venuecreatename").value;
-    let location = document.getElementById("venuelocation").value;
-    let managerPassword = document.getElementById("managerpass").value;
-    let layoutName = document.getElementById("layoutname").value;
+        function CreateVenue(e) {
 
-    payload = {
-        "venueName": venueName,
-        "location": location,
-        "managerPassword": managerPassword,
-        "layoutName": layoutName,
-    }
+            let venueName = document.getElementById("venuecreatename").value;
+            let location = document.getElementById("venuelocation").value;
+            let managerPassword = document.getElementById("managerpass").value;
+            let endrowcolL = document.getElementById("endrowcolL").value;
+            let endrowcolR = document.getElementById("endrowcolR").value;
+            let endrowcolC = document.getElementById("endrowcolC").value;
 
-    const response = fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/createVenue",
-    {
-        method: "POST",
-        body: JSON.stringify(payload)
-    }).then((response) => response)
-    console.log(response)
+            payload = {
+                "venueName": venueName,
+                "location": location,
+                "managerPassword": managerPassword,
+                "endRowColL": endrowcolL,
+                "endRowColR": endrowcolR,
+                "endRowColC": endrowcolC,
+            }
 
-    const fetchResult = async () => {
-        let val = await response
-        let result = await val.json()
-        document.getElementById("result").value = result.body
-    }
-    
+            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/createVenue", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Check if the statusCode is 400, which indicates an error
+                    if (data.statusCode === 400) {
+                        // Display the error message below the Create Venue button
+                        document.getElementById("Error2").textContent = data.body;
+                    } else {
+                        // Handle a successful response or other status codes accordingly
+                        document.getElementById("Error2").textContent = "Venue created successfully!";
+                    }
+                })
+                .catch(error => {
+                    // Handle any network errors
+                    document.getElementById("Error2").textContent = "Network error: " + error.message;
+                });
 
-    fetchResult()
-}
+            // Clear the input fields after the operation
+            document.getElementById("venuecreatename").value = '';
+            document.getElementById("venuelocation").value = '';
+            document.getElementById("managerpass").value = '';
+            document.getElementById("endrowcolL").value = '';
+            document.getElementById("endrowcolR").value = '';
+            document.getElementById("endrowcolC").value = '';
+        }
 
-function DeleteVenue(e) {
-   
-    let venuedeletename = document.getElementById("venuedeletename").value;
-    let managerpass2 = document.getElementById("managerpass2").value;
-
-
-    payload = {
-        "venueName": venuedeletename,
-        "location": managerpass2,
-    }
-
-    const response = fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/deleteVenue",
-    {
-        method: "POST",
-        body: JSON.stringify(payload)
-    }).then((response) => response)
-    console.log(response)
-
-    const fetchResult = async () => {
-        let val = await response
-        let result = await val.json()
-        document.getElementById("result").value = result.body
-    }
-    
-
-    fetchResult()
-}
-
-</script>
-
-
-
-<div className="App">
-    <header className="App-header">
-      <label >Seats4u</label>
-
-      <div >
         
-        <div >
-          <div >
-            <label >Name:</label>
-            <input id = "venuecreatename" />
-          </div>
-          <div >
-            <label >Location:</label>
-            <input id = "venuelocation" />
-          </div>
-          <div >
-            <label >Layout Section:</label>
-            <input id = "layoutname"  />
-          </div>
-          <div >
-            <label >Password:</label>
-            <input id = "managerpass" type = "password"  />
-          </div>
+        function DeleteVenue(e) {
+            let venuedeletename = document.getElementById("venuedeletename").value;
+            let managerpass2 = document.getElementById("managerpass2").value;
 
-          <button onClick=CreateVenue(event)>Create Venue</button>
-          <div id="result">
-        </div>
-          <div >
-            <label >Name:</label>
-            <input  id = "venuedeletename"/>
-          </div>
-          <div >
-            <label >Password:</label>
-            <input id = "managerpass2" type = "password"/>
-          </div>
-          <button  onClick=DeleteVenue(event)>Delete Venue</button>
-        </div>
-        <div >
-          <div >
-            <label >Venue Name:</label>
-            <input id = "venuenamecreateshow"  />
-          </div>
-          <div >
-            <label >Show Name:</label>
-            <input id = "showname" />
-          </div>
-          <div >
-            <label >Date:</label>
-            <input id = "date"/>
-          </div>
-          <div >
-            <label >Time:</label>
-            <input id = "time"  />
-          </div>
-          <div>
-            <label >Price:</label>
-            <input id = "price" />
-          </div>
-          <div >
-            <label>Password:</label>
-            <input id = "showcreatepass" type = "password"/>
-          </div>
-          <button  onClick="JavaScript:CreateShow()">Create Show</button>
-        </div>
-        <div >
-          <div >
-            <label >Password:</label>
-            <input id = "adminpass" type = "password"  />
-          </div>
-          <button onClick="JavaScript:ListVenues()">List Venues</button>
+            let payload = {
+                "venueName": venuedeletename,
+                "managerPassword": managerpass2,
+            };
 
+            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/deleteVenue", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json()) // Parse the JSON from the response
+                .then(data => {
+                    // Check if the statusCode is 400, which indicates an error
+                    if (data.statusCode === 400) {
+                        // Display the error message below the Delete Venue button
+                        document.getElementById("Error").textContent = data.body;
+                    } else {
+                        // Handle a successful response or other status codes accordingly
+                        document.getElementById("Error").textContent = "Venue deleted successfully!";
+                    }
+                })
+                .catch(error => {
+                    // Handle any network errors
+                    document.getElementById("Error").textContent = "Network error: " + error.message;
+                });
+
+            document.getElementById("venuedeletename").value = '';
+            document.getElementById("managerpass2").value = '';
+        }
+
+        function ListVenues(e) {
+            let adminpass = document.getElementById("adminpass").value;
+
+            let payload = {
+                "adminPassword": adminpass,
+            };
+
+            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/listVenues", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json()) // Parse the JSON from the response
+                .then(data => {
+                    // Check if the statusCode is 400, which indicates an error
+                    if (data.statusCode === 400) {
+                        // Display the error message below the Delete Venue button
+                        document.getElementById("Error3").textContent = data.body;
+                    } else {
+                        // Handle a successful response or other status codes accordingly
+                        document.getElementById("Error3").textContent = data.body;
+                    }
+                })
+                .catch(error => {
+                    // Handle any network errors
+                    document.getElementById("Error3").textContent = "Network error: " + error.message;
+                });
+
+            document.getElementById("adminPassword").value = '';
+        }
+
+
+    </script>
+
+
+    <link rel="stylesheet" href="Layout.css">
+
+    <div className="App">
+
+        <header className="App-header">
+            <label class="seats4u">Seats4u</label>
+        </header>
+        <div class="formContainer">
+
+            <div class="formColumn">
+                <div class="formRow">
+                    <label class="label">Name:</label>
+                    <input id="venuecreatename" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">Location:</label>
+                    <input id="venuelocation" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">Password:</label>
+                    <input id="managerpass" type="password" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">End Row Column Left:</label>
+                    <input id="endrowcolL" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">End Row Column Right:</label>
+                    <input id="endrowcolR" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">End Row Column Center:</label>
+                    <input id="endrowcolC" class="input" />
+                </div>
+                <div id="result">
+                </div>
+                <button class="createVenueButton" onClick=CreateVenue(event)>Create Venue</button>
+                <div id="Error2"></div>
+                <div class="formRow">
+                    <label class="label">Name:</label>
+                    <input id="venuedeletename" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">Password:</label>
+                    <input id="managerpass2" type="password" class="input" />
+                </div>
+                <button class="deleteVenueButton" onClick=DeleteVenue(event)>Delete Venue</button>
+                <div id="Error"></div>
+            </div>
+            <div class="formColumn">
+                <div class="formRow">
+                    <label class="label">Venue Name:</label>
+                    <input id="venuenamecreateshow" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">Show Name:</label>
+                    <input id="showname" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">Date:</label>
+                    <input id="date" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">Time:</label>
+                    <input id="time" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">Price:</label>
+                    <input id="price" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">Password:</label>
+                    <input id="showcreatepass" type="password" class="input" />
+                </div>
+                <button class="createShowButton" onClick=CreateShow(event)>Create Show</button>
+            </div>
+            <div class="formColumn">
+                <div class="formRow">
+                    <label class="label">Password:</label>
+                    <input id="adminpass" type="password" class="input" />
+                </div>
+                <button class="listVenuesButton" onClick=ListVenues(event)>List Venues</button>
+                <div id="Error3"></div>
+
+            </div>
         </div>
-      </div>
-    </header>
-  </div>
+        </header>
+    </div>
+
 </body>
+
 </html>

@@ -1,30 +1,84 @@
 const mysql = require('mysql');
-const db_access = require('/opt/nodejs/db_access')
-
+const db_access = require('/opt/nodejs/db_access');
 
 exports.handler = async (event) => {
-    // get credentials from the db_access layer (loaded separately via AWS console)
-  var pool = mysql.createPool({
-      host: db_access.config.host,
-      user: db_access.config.user,
-      password: db_access.config.password,
-      database: db_access.config.database
-  });
-  
-  let ListConstants = () => {
-      return new Promise((resolve, reject) => {
-          pool.query("INSERT INTO Venue (venueName, venueShows, location, managerPassword, adminPassword, layoutName) VALUES (?,?,?,?,?,?)", [event.venueName, event.venueShows, event.location, event.managerPassword, event.adminPassword, event.layoutName], (error, rows) => { 
-              if (error) { return reject(error); }
-              return resolve(rows);
-          })
-      })
-  }
-  
-  const all_constants = await ListConstants()
-  
-  const response = {
-    statusCode: 200,
-    constants: all_constants
-  }
-  return response;
+    var pool = mysql.createPool({
+        host: db_access.config.host,
+        user: db_access.config.user,
+        password: db_access.config.password,
+        database: db_access.config.database
+    });
+    
+let venueExists = (venueName) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT COUNT(*) AS count FROM Venue WHERE venueName = ?", [venueName], (error, results) => {
+            if (error) {
+                console.error("SQL Error: ", error);
+                return reject({
+                    statusCode: 500,
+                    body: JSON.stringify({ Error: error.message })
+                });
+            }
+            console.log("SQL Results: ", results);
+            const exists = results[0].count > 0;
+            console.log("Venue Exists: ", exists);
+            resolve(exists);
+        });
+    });
+};
+
+    let CreateVenue = async () => {
+        // Check for missing mandatory fields before executing the query
+        
+         if (await venueExists(event.venueName)) {
+            return Promise.reject({
+                statusCode: 400,
+                body: JSON.stringify({ Error: "Venue name already in use." })
+            });
+        }
+        
+    let missingFields = [];
+
+    if (!event.venueName) missingFields.push("Name");
+    if (!event.managerPassword) missingFields.push("Password");
+    if (!event.location) missingFields.push("Location");
+    if (!event.endRowColL) missingFields.push("End Row Column Left");
+    if (!event.endRowColR) missingFields.push("End Row Column Right");
+    if (!event.endRowColC) missingFields.push("End Row Column Center");
+
+    // If any required field is missing, reject the promise
+    if (missingFields.length > 0) {
+        return Promise.reject({
+            statusCode: 400,
+            body: JSON.stringify({ Error: "Missing mandatory field(s): " + missingFields.join(", ") })
+        });
+    }
+        
+
+        return new Promise((resolve, reject) => {
+            pool.query("INSERT INTO Venue (venueName, location, managerPassword, endRowColL, endRowColR, endRowColC) VALUES (?,?,?,?,?,?)", [event.venueName, event.location, event.managerPassword, event.endRowColL, event.endRowColR, event.endRowColC], (error, rows) => { 
+                if (error) {
+                    return reject({
+                      statusCode: 500,
+                      body: JSON.stringify({ Error: error.message })
+                    });
+                }
+                return resolve(rows);
+            });
+        });
+    }
+
+    try {
+        const result = await CreateVenue();
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: 'Venue created successfully.', result: result })
+        };
+    } catch (errorResponse) {
+        // Return the error response from the rejected promise
+        return {
+            statusCode: errorResponse.statusCode,
+            body: errorResponse.body
+        };
+    }
 };

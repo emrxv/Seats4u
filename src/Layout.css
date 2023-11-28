@@ -1,0 +1,106 @@
+.App {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 30px auto;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.App-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+
+.seats4u {
+  top: 30px;
+  color: white;
+  /* Create a solid stroke effect */
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px 1px 0 #000,
+     1px 1px 0 #000;
+  font-size: 100px;
+  margin-bottom: 20px;
+}
+
+.formContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.formColumn {
+  flex: 1; /* each column takes one third of the space */
+  margin-right: 20px; /* space between columns */
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Last column doesn't need right margin */
+.formColumn:last-child {
+  margin-right: 0;
+}
+
+.formRow {
+  margin-bottom: 10px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #5cb85c;
+  color: white;
+  padding: 10px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #449d44;
+}
+
+@media (max-width: 768px) {
+  .formContainer {
+    flex-direction: column;
+  }
+
+  .formColumn {
+    margin-right: 0;
+    margin-bottom: 20px; /* space between sections on mobile */
+  }
+}
+
+#Error3 {
+  color: red; /* Error messages are typically red */
+  margin-top: 10px;
+}
+
+#Error2 {
+  color: red; /* Error messages are typically red */
+  margin-top: 10px;
+}
+
+#Error {
+  color: red; /* Error messages are typically red */
+  margin-top: 10px;
+}
