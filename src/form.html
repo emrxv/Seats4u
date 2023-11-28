@@ -1,6 +1,7 @@
 <html> <body>
     <script type="text/javascript">
 function CreateVenue(e) {
+
     let venueName = document.getElementById("venuecreatename").value;
     let location = document.getElementById("venuelocation").value;
     let managerPassword = document.getElementById("managerpass").value;
@@ -14,6 +15,34 @@ function CreateVenue(e) {
     }
 
     const response = fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/createVenue",
+    {
+        method: "POST",
+        body: JSON.stringify(payload)
+    }).then((response) => response)
+    console.log(response)
+
+    const fetchResult = async () => {
+        let val = await response
+        let result = await val.json()
+        document.getElementById("result").value = result.body
+    }
+    
+
+    fetchResult()
+}
+
+function DeleteVenue(e) {
+   
+    let venuedeletename = document.getElementById("venuedeletename").value;
+    let managerpass2 = document.getElementById("managerpass2").value;
+
+
+    payload = {
+        "venueName": venuedeletename,
+        "location": managerpass2,
+    }
+
+    const response = fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/deleteVenue",
     {
         method: "POST",
         body: JSON.stringify(payload)
@@ -69,7 +98,7 @@ function CreateVenue(e) {
             <label >Password:</label>
             <input id = "managerpass2" type = "password"/>
           </div>
-          <button  onClick="JavaScript:DeleteVenue()">Delete Venue</button>
+          <button  onClick=DeleteVenue(event)>Delete Venue</button>
         </div>
         <div >
           <div >
