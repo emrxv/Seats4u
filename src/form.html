@@ -1,31 +1,117 @@
 <html> <body>
     <script type="text/javascript">
-    function handleClick(e) {
-        let arg1 = document.getElementById("arg1").value;
-        let arg2 = document.getElementById("arg2").value;
+function CreateVenue(e) {
+    let venueName = document.getElementById("venuecreatename").value;
+    let location = document.getElementById("venuelocation").value;
+    let managerPassword = document.getElementById("managerpass").value;
+    let sideleft = document.getElementById("sideleft").value;
+    let center = document.getElementById("center").value;
+    let sideright = document.getElementById("sideright").value;
+    let layoutName = document.getElementById("layoutname").value;
 
-        payload = {"arg1" : arg1,
-                   "arg2" : arg2 }
-    const response = fetch("https://mqb88nscb7.execute-api.us-east-1.amazonaws.com/API/calc",
-    { 
-        method: "POST",
-        body: JSON.stringify(payload)
-    }).then((response) => response)
+    let payload = {
+        "venuecreatename": venueName,
+        "venuelocation": location,
+        "managerpass": managerPassword,
+        "null" : adminPassword,
+        "layoutname": layoutName,
+    }
+    const response = fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/createVenue",
+        {
+            method: "POST",
+            body: JSON.stringify(payload)
+        }).then((response) => response)
 
     const fetchResult = async () => {
         let val = await response
         let result = await val.json()
         document.getElementById("result").value = result.body
     }
+    
 
     fetchResult()
-    }
+}
+
+
+import './App.css';
+import { layout } from './Layout.js'
+import './model.js';
 </script>
 
-<h1>Request to add values via AWS</h1>
-Arg1: &nbsp; <input id="arg1"/> &nbsp; Arg2: &nbsp; <input id="arg2"/><br>
-Result: &nbsp; <input id="result" readonly/><br>
-<input type="button" value="Add" onClick="JavaScript:handleClick(this)">
 
+
+<div className="App">
+    <header className="App-header">
+      <label >Seats4u</label>
+
+      <div >
+        
+        <div >
+          <div >
+            <label >Name:</label>
+            <input id = "venuecreatename" />
+          </div>
+          <div >
+            <label >Location:</label>
+            <input id = "venuelocation" />
+          </div>
+          <div >
+            <label >Layout Section:</label>
+            <input id = "layoutname"  />
+          </div>
+          <div >
+            <label >Password:</label>
+            <input id = "managerpass" type = "password"  />
+          </div>
+
+          <button onClick="JavaScript:CreateVenue(event)">Create Venue</button>
+          <div >
+            <label >Name:</label>
+            <input  id = "venuedeletename"/>
+          </div>
+          <div >
+            <label >Password:</label>
+            <input id = "managerpass" type = "password"/>
+          </div>
+          <button  onClick="JavaScript:DeleteVenue()">Delete Venue</button>
+        </div>
+        <div >
+          <div >
+            <label >Venue Name:</label>
+            <input id = "venuenamecreateshow"  />
+          </div>
+          <div >
+            <label >Show Name:</label>
+            <input id = "showname" />
+          </div>
+          <div >
+            <label >Date:</label>
+            <input id = "date"/>
+          </div>
+          <div >
+            <label >Time:</label>
+            <input id = "time"  />
+          </div>
+          <div>
+            <label >Price:</label>
+            <input id = "price" />
+          </div>
+          <div >
+            <label>Password:</label>
+            <input id = "showcreatepass" type = "password"/>
+          </div>
+          <button  onClick="JavaScript:CreateShow()">Create Show</button>
+        </div>
+        <div >
+          <div >
+            <label >Password:</label>
+            <input id = "adminpass" type = "password"  />
+          </div>
+          <button onClick="JavaScript:ListVenues()">List Venues</button>
+
+        </div>
+      </div>
+    </header>
+  </div>
 </body>
 </html>
