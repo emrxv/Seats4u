@@ -43,14 +43,14 @@
 
             // Clear the input fields after the operation
             document.getElementById("venuecreatename").value = '';
-            document.getElementById("venuelocation").value = '';
+            document.getElementById("showname").value = '';
             document.getElementById("managerpass").value = '';
             document.getElementById("endrowcolL").value = '';
             document.getElementById("endrowcolR").value = '';
             document.getElementById("endrowcolC").value = '';
         }
 
-        
+
         function DeleteVenue(e) {
             let venuedeletename = document.getElementById("venuedeletename").value;
             let managerpass2 = document.getElementById("managerpass2").value;
@@ -115,42 +115,107 @@
         }
 
 
+        function CreateShow(e) {
+
+            let venuenamecreateshow = document.getElementById("venuenamecreateshow").value;
+            let showname = document.getElementById("showname").value;
+            let active = document.getElementById("active").value;
+            let proceeds = document.getElementById("proceeds").value;
+            let date = document.getElementById("date").value;
+            let time = document.getElementById("time").value;
+            let blockid = document.getElementById("blockid").value;
+            let availabilityid = document.getElementById("availabilityid").value;
+            let remainid = document.getElementById("remainid").value;
+            let price = document.getElementById("price").value;
+            let showcreatepass = document.getElementById("showcreatepass").value;
+
+            payload = {
+                "showName": showname,
+                "venueName": venuenamecreateshow,
+                "active": active,
+                "proceedings": proceeds,
+                "date": date,
+                "time": time,
+                "BlockID": blockid,
+                "availabilityID": availabilityid,
+                "remainID": remainid,
+                "price": price,
+                "managerPassword": showcreatepass,
+            }           
+            console.log(payload)
+            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/createShow", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Check if the statusCode is 400, which indicates an error
+                    if (data.statusCode === 400 || data.statusCode === 500) {
+                        // Display the error message below the Create Venue button
+                        document.getElementById("Error4").textContent = data.body;
+                    } else {
+                        // Handle a successful response or other status codes accordingly
+                        document.getElementById("Error4").textContent = "Show created successfully!";
+                    }
+                })
+                .catch(error => {
+                    // Handle any network errors
+                    document.getElementById("Error4").textContent = "Network error: " + error.message;
+                });
+                console.log(JSON.stringify(response))
+
+            // Clear the input fields after the operation
+            document.getElementById("venuenamecreateshow").value = '';
+            document.getElementById("showname").value = '';
+            document.getElementById("active").value = '';
+            document.getElementById("date").value = '';
+            document.getElementById("time").value = '';
+            document.getElementById("price").value = '';
+            document.getElementById("showcreatepass").value = '';
+        }
+
     </script>
 
 
     <link rel="stylesheet" href="Layout.css">
 
-    <div className="App">
+    <div class="App">
 
-        <header className="App-header">
-            <label class="seats4u">Seats4u</label>
+        <header class="App-header">
+            <label class="seats4u">SEATS4U</label>
         </header>
         <div class="formContainer">
 
             <div class="formColumn">
                 <div class="formRow">
                     <label class="label">Name:</label>
-                    <input id="venuecreatename" class="input" />
+                    <input placeholder="Name Your Venue" id="venuecreatename" class="input" />
                 </div>
                 <div class="formRow">
                     <label class="label">Location:</label>
-                    <input id="venuelocation" class="input" />
+                    <input placeholder="Enter Venue Location" id="venuelocation" class="input" />
                 </div>
                 <div class="formRow">
                     <label class="label">Password:</label>
-                    <input id="managerpass" type="password" class="input" />
+                    <input placeholder="Create a Venue Password" id="managerpass" type="password" class="input" />
                 </div>
                 <div class="formRow">
+                    <div class="label">Start Row Column Left:</div>
+                    <input placeholder="A1" class="input" readonly/>
                     <label class="label">End Row Column Left:</label>
-                    <input id="endrowcolL" class="input" />
+                    <input placeholder="Enter seat ID: LetterNumber" id="endrowcolL" class="input" />
                 </div>
                 <div class="formRow">
-                    <label class="label">End Row Column Right:</label>
-                    <input id="endrowcolR" class="input" />
-                </div>
-                <div class="formRow">
+                    <div class="label">Start Row Column Center:</div>
+                    <input placeholder="A1" class="input" readonly/>
                     <label class="label">End Row Column Center:</label>
-                    <input id="endrowcolC" class="input" />
+                    <input placeholder="Enter seat ID: LetterNumber" id="endrowcolC" class="input" />
+                </div>
+                <div class="formRow">
+                    <div class="label">Start Row Column Right:</div>
+                    <input placeholder="A1" class="input" readonly/>
+                    <label class="label">End Row Column Right:</label>
+                    <input  placeholder="Enter seat ID: LetterNumber"  id="endrowcolR" class="input" />
                 </div>
                 <div id="result">
                 </div>
@@ -158,46 +223,67 @@
                 <div id="Error2"></div>
                 <div class="formRow">
                     <label class="label">Name:</label>
-                    <input id="venuedeletename" class="input" />
+                    <input placeholder="Enter Venue Name" id="venuedeletename" class="input" />
                 </div>
                 <div class="formRow">
                     <label class="label">Password:</label>
-                    <input id="managerpass2" type="password" class="input" />
+                    <input placeholder="Enter Venue Password" id="managerpass2" type="password" class="input" />
                 </div>
                 <button class="deleteVenueButton" onClick=DeleteVenue(event)>Delete Venue</button>
                 <div id="Error"></div>
             </div>
             <div class="formColumn">
                 <div class="formRow">
-                    <label class="label">Venue Name:</label>
-                    <input id="venuenamecreateshow" class="input" />
+                    <label class="label">Show Name:</label>
+                    <input placeholder="Name Your Show" id="showname" class="input" />
                 </div>
                 <div class="formRow">
-                    <label class="label">Show Name:</label>
-                    <input id="showname" class="input" />
+                    <label class="label">Venue Name:</label>
+                    <input placeholder="Enter Venue Name" id="venuenamecreateshow" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">Active:</label>
+                    <input id="active"  placeholder="Enter '0' if Show Inactive or '1' if Active " class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">Proceeds:</label>
+                    <input placeholder="Enter Show Proceeds" id="proceeds" class="input" />
                 </div>
                 <div class="formRow">
                     <label class="label">Date:</label>
-                    <input id="date" class="input" />
+                    <input placeholder="Enter Show Date" id="date" class="input" />
                 </div>
                 <div class="formRow">
                     <label class="label">Time:</label>
-                    <input id="time" class="input" />
+                    <input placeholder="Enter Show Time" id="time" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">BlockID:</label>
+                    <input placeholder="Enter Show BlockID" id="blockid" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">AvailabilityID:</label>
+                    <input placeholder="Enter Show AvailabilityID" id="availabilityid" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">RemainID:</label>
+                    <input placeholder="Enter Show RemainID" id="remainid" class="input" />
                 </div>
                 <div class="formRow">
                     <label class="label">Price:</label>
-                    <input id="price" class="input" />
+                    <input placeholder="Enter Show Price" id="price" class="input" />
                 </div>
                 <div class="formRow">
                     <label class="label">Password:</label>
-                    <input id="showcreatepass" type="password" class="input" />
+                    <input placeholder="Enter Venue Password" id="showcreatepass" type="password" class="input" />
                 </div>
                 <button class="createShowButton" onClick=CreateShow(event)>Create Show</button>
+                <div id="Error4"></div>
             </div>
             <div class="formColumn">
                 <div class="formRow">
                     <label class="label">Password:</label>
-                    <input id="adminpass" type="password" class="input" />
+                    <input placeholder="Enter Admin Password" id="adminpass" type="password" class="input" />
                 </div>
                 <button class="listVenuesButton" onClick=ListVenues(event)>List Venues</button>
                 <div id="Error3"></div>
