@@ -12,7 +12,6 @@ body, html {
   padding: 20px;
   margin: 30px auto;
   border-radius: 8px;
-  background: 7cb9be; /* Semi-transparent background using e0eff0 */
   backdrop-filter: blur(10px);
   box-shadow: 0 10px 30px rgba(124, 185, 190, 0.2);
   border: 1px solid rgba(232, 243, 244, 0.3); /* Border using e8f3f4 */
@@ -59,6 +58,9 @@ body, html {
   border-radius: 10px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(232, 243, 244, 0.3);
+  overflow-wrap: break-word; /* Breaks long words that would overflow */
+  word-wrap: break-word; /* Older CSS3 property for breaking long words */
+  overflow: hidden; /* Hides the content that overflows the container */
 }
 
 .formRow {
@@ -110,9 +112,13 @@ button:hover {
 }
 
 /* Error Messages */
-#Error, #Error2, #Error3, #Error4 {
+#Error, #Error2, #Error3, #Error4, #Error5, #Error6 {
   color: #ffe8ec;
   margin-top: 10px;
+  word-wrap: break-word; /* Breaks long words to prevent horizontal scrolling */
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
 
 @media (max-width: 768px) {

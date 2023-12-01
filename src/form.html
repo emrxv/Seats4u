@@ -84,6 +84,39 @@
             document.getElementById("managerpass2").value = '';
         }
 
+        function DeleteShow(e) {
+            let showdeletename = document.getElementById("showdeletename").value;
+            let managerpass3 = document.getElementById("managerpass3").value;
+
+            let payload = {
+                "showName": showdeletename,
+                "managerPassword": managerpass3,
+            };
+
+            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/deleteShow", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json()) // Parse the JSON from the response
+                .then(data => {
+                    // Check if the statusCode is 400, which indicates an error
+                    if (data.statusCode === 400 || data.statusCode === 500) {
+                        // Display the error message below the Delete Venue button
+                        document.getElementById("Error5").textContent = data.body;
+                    } else {
+                        // Handle a successful response or other status codes accordingly
+                        document.getElementById("Error5").textContent = "Show deleted successfully!";
+                    }
+                })
+                .catch(error => {
+                    // Handle any network errors
+                    document.getElementById("Error5").textContent = "Network error: " + error.message;
+                });
+
+            document.getElementById("showdeletename").value = '';
+            document.getElementById("managerpass3").value = '';
+        }
+
         function ListVenues(e) {
             let adminpass = document.getElementById("adminpass").value;
 
@@ -97,13 +130,32 @@
             })
                 .then(response => response.json()) // Parse the JSON from the response
                 .then(data => {
-                    // Check if the statusCode is 400, which indicates an error
                     if (data.statusCode === 400) {
-                        // Display the error message below the Delete Venue button
+                        // Display the error message
                         document.getElementById("Error3").textContent = data.body;
                     } else {
-                        // Handle a successful response or other status codes accordingly
-                        document.getElementById("Error3").textContent = data.body;
+                        // Clear previous content
+                        document.getElementById("Error3").innerHTML = '';
+
+                        // Parse the shows array from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let venues = responseBody.venues;
+
+                        // Create a list element
+                        let list = document.createElement('ul');
+                        list.style.listStyleType = 'none'; // Remove bullet points
+                        list.style.padding = '0'; // Remove default padding
+
+                        // Iterate over the shows array and append each show as a list item
+                        venues.forEach(venue => {
+                            let listItem = document.createElement('li');
+                            listItem.textContent = venue;
+                            listItem.style.marginBottom = '10px'; // Space between items
+                            list.appendChild(listItem);
+                        });
+
+                        // Append the list to the Error6 element
+                        document.getElementById("Error3").appendChild(list);
                     }
                 })
                 .catch(error => {
@@ -114,34 +166,91 @@
             document.getElementById("adminPassword").value = '';
         }
 
+        function ListShows(e) {
+            let showlistname = document.getElementById("showlistname").value;
+            let managerpass4 = document.getElementById("managerpass4").value;
+
+            let payload = {
+                "venueName": showlistname,
+                "managerPassword": managerpass4,
+            };
+
+            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/listShows", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json()) // Parse the JSON from the response
+                .then(data => {
+                    if (data.statusCode === 400) {
+                        // Display the error message
+                        document.getElementById("Error6").textContent = data.body;
+                    } else {
+                        // Clear previous content
+                        document.getElementById("Error6").innerHTML = '';
+
+                        // Parse the shows array from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let shows = responseBody.shows;
+
+                        // Create a list element
+                        let list = document.createElement('ul');
+                        list.style.listStyleType = 'none'; // Remove bullet points
+                        list.style.padding = '0'; // Remove default padding
+
+                        // Iterate over the shows array and append each show as a list item
+                        shows.forEach(show => {
+                            let listItem = document.createElement('li');
+                            listItem.textContent = show;
+                            listItem.style.marginBottom = '10px'; // Space between items
+                            list.appendChild(listItem);
+                        });
+
+                        // Append the list to the Error6 element
+                        document.getElementById("Error6").appendChild(list);
+                    }
+                })
+                .catch(error => {
+                    // Handle any network errors
+                    document.getElementById("Error6").textContent = "Network error: " + error.message;
+                });
+
+            document.getElementById("showlistname").value = '';
+            document.getElementById("managerpass4").value = '';
+        }
+
+
+
+
+        function generateUUID() {
+            let array = new Uint8Array(16);
+            window.crypto.getRandomValues(array);
+            array[6] = (array[6] & 0x0f) | 0x40; // Version 4 UUID
+            array[8] = (array[8] & 0x3f) | 0x80; // Variant 10xx (RFC 4122)
+
+            let hexArray = Array.from(array, byte => byte.toString(16).padStart(2, '0'));
+            return `${hexArray.slice(0, 4).join('')}-${hexArray.slice(4, 6).join('')}-${hexArray.slice(6, 8).join('')}-${hexArray.slice(8, 10).join('')}-${hexArray.slice(10, 16).join('')}`;
+        }
 
         function CreateShow(e) {
-
             let venuenamecreateshow = document.getElementById("venuenamecreateshow").value;
             let showname = document.getElementById("showname").value;
-            let active = document.getElementById("active").value;
-            let proceeds = document.getElementById("proceeds").value;
             let date = document.getElementById("date").value;
             let time = document.getElementById("time").value;
-            let blockid = document.getElementById("blockid").value;
-            let availabilityid = document.getElementById("availabilityid").value;
-            let remainid = document.getElementById("remainid").value;
             let price = document.getElementById("price").value;
             let showcreatepass = document.getElementById("showcreatepass").value;
+            var remainID = generateUUID();
 
             payload = {
                 "showName": showname,
                 "venueName": venuenamecreateshow,
-                "active": active,
-                "proceedings": proceeds,
+                "active": 0,
+                "proceedings": 0,
                 "date": date,
                 "time": time,
-                "BlockID": blockid,
-                "availabilityID": availabilityid,
-                "remainID": remainid,
+                "remainID": remainID,
                 "price": price,
                 "managerPassword": showcreatepass,
-            }           
+            }
             console.log(payload)
             fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/createShow", {
                 method: "POST",
@@ -162,7 +271,7 @@
                     // Handle any network errors
                     document.getElementById("Error4").textContent = "Network error: " + error.message;
                 });
-                console.log(JSON.stringify(response))
+            console.log(JSON.stringify(response))
 
             // Clear the input fields after the operation
             document.getElementById("venuenamecreateshow").value = '';
@@ -201,23 +310,21 @@
                 </div>
                 <div class="formRow">
                     <div class="label">Start Row Column Left:</div>
-                    <input placeholder="A1" class="input" readonly/>
+                    <input placeholder="A1" class="input" readonly />
                     <label class="label">End Row Column Left:</label>
                     <input placeholder="Enter seat ID: LetterNumber" id="endrowcolL" class="input" />
                 </div>
                 <div class="formRow">
                     <div class="label">Start Row Column Center:</div>
-                    <input placeholder="A1" class="input" readonly/>
+                    <input placeholder="A1" class="input" readonly />
                     <label class="label">End Row Column Center:</label>
                     <input placeholder="Enter seat ID: LetterNumber" id="endrowcolC" class="input" />
                 </div>
                 <div class="formRow">
                     <div class="label">Start Row Column Right:</div>
-                    <input placeholder="A1" class="input" readonly/>
+                    <input placeholder="A1" class="input" readonly />
                     <label class="label">End Row Column Right:</label>
-                    <input  placeholder="Enter seat ID: LetterNumber"  id="endrowcolR" class="input" />
-                </div>
-                <div id="result">
+                    <input placeholder="Enter seat ID: LetterNumber" id="endrowcolR" class="input" />
                 </div>
                 <button class="createVenueButton" onClick=CreateVenue(event)>Create Venue</button>
                 <div id="Error2"></div>
@@ -242,32 +349,12 @@
                     <input placeholder="Enter Venue Name" id="venuenamecreateshow" class="input" />
                 </div>
                 <div class="formRow">
-                    <label class="label">Active:</label>
-                    <input id="active"  placeholder="Enter '0' if Show Inactive or '1' if Active " class="input" />
-                </div>
-                <div class="formRow">
-                    <label class="label">Proceeds:</label>
-                    <input placeholder="Enter Show Proceeds" id="proceeds" class="input" />
-                </div>
-                <div class="formRow">
                     <label class="label">Date:</label>
-                    <input placeholder="Enter Show Date" id="date" class="input" />
+                    <input id="date" class="input" type="date" />
                 </div>
                 <div class="formRow">
                     <label class="label">Time:</label>
-                    <input placeholder="Enter Show Time" id="time" class="input" />
-                </div>
-                <div class="formRow">
-                    <label class="label">BlockID:</label>
-                    <input placeholder="Enter Show BlockID" id="blockid" class="input" />
-                </div>
-                <div class="formRow">
-                    <label class="label">AvailabilityID:</label>
-                    <input placeholder="Enter Show AvailabilityID" id="availabilityid" class="input" />
-                </div>
-                <div class="formRow">
-                    <label class="label">RemainID:</label>
-                    <input placeholder="Enter Show RemainID" id="remainid" class="input" />
+                    <input type="time" id="time" class="input" />
                 </div>
                 <div class="formRow">
                     <label class="label">Price:</label>
@@ -279,6 +366,28 @@
                 </div>
                 <button class="createShowButton" onClick=CreateShow(event)>Create Show</button>
                 <div id="Error4"></div>
+                <div class="formRow">
+                    <label class="label">Name:</label>
+                    <input placeholder="Enter Show Name" id="showdeletename" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">Password:</label>
+                    <input placeholder="Enter Venue Password" id="managerpass3" type="password" class="input" />
+                </div>
+                <button class="deleteShowButton" onClick=DeleteShow(event)>Delete Show</button>
+                <div id="Error5"></div>
+                <div class="formRow">
+                    <label class="label">Name:</label>
+                    <input placeholder="Enter Venue Name" id="showlistname" class="input" />
+                </div>
+                <div class="formRow">
+                    <label class="label">Password:</label>
+                    <input placeholder="Enter Venue Password" id="managerpass4" type="password" class="input" />
+                </div>
+                <div class="formRow">
+                    <button class="listShowsButton" onClick=ListShows(event)>List Shows</button>
+                    <div id="Error6"></div>
+                </div>
             </div>
             <div class="formColumn">
                 <div class="formRow">
@@ -287,7 +396,6 @@
                 </div>
                 <button class="listVenuesButton" onClick=ListVenues(event)>List Venues</button>
                 <div id="Error3"></div>
-
             </div>
         </div>
         </header>
