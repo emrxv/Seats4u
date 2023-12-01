@@ -4,7 +4,6 @@
     <script type="text/javascript">
 
         function CreateVenue(e) {
-
             let venueName = document.getElementById("venuecreatename").value;
             let location = document.getElementById("venuelocation").value;
             let managerPassword = document.getElementById("managerpass").value;
@@ -12,14 +11,14 @@
             let endrowcolR = document.getElementById("endrowcolR").value;
             let endrowcolC = document.getElementById("endrowcolC").value;
 
-            payload = {
+            let payload = {
                 "venueName": venueName,
                 "location": location,
                 "managerPassword": managerPassword,
                 "endRowColL": endrowcolL,
                 "endRowColR": endrowcolR,
                 "endRowColC": endrowcolC,
-            }
+            };
 
             fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/createVenue", {
                 method: "POST",
@@ -27,12 +26,14 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Check if the statusCode is 400, which indicates an error
-                    if (data.statusCode === 400) {
-                        // Display the error message below the Create Venue button
-                        document.getElementById("Error2").textContent = data.body;
+                    if (data.statusCode !== 200) {
+                        // Parse the error message from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
+
+                        // Display the error message
+                        document.getElementById("Error2").textContent = errorMessage;
                     } else {
-                        // Handle a successful response or other status codes accordingly
                         document.getElementById("Error2").textContent = "Venue created successfully!";
                     }
                 })
@@ -43,7 +44,7 @@
 
             // Clear the input fields after the operation
             document.getElementById("venuecreatename").value = '';
-            document.getElementById("showname").value = '';
+            document.getElementById("venuelocation").value = '';
             document.getElementById("managerpass").value = '';
             document.getElementById("endrowcolL").value = '';
             document.getElementById("endrowcolR").value = '';
@@ -64,14 +65,16 @@
                 method: "POST",
                 body: JSON.stringify(payload)
             })
-                .then(response => response.json()) // Parse the JSON from the response
+                .then(response => response.json())
                 .then(data => {
-                    // Check if the statusCode is 400, which indicates an error
-                    if (data.statusCode === 400) {
-                        // Display the error message below the Delete Venue button
-                        document.getElementById("Error").textContent = data.body;
+                    if (data.statusCode !== 200) {
+                        // Parse the error message from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
+
+                        // Display the error message
+                        document.getElementById("Error").textContent = errorMessage;
                     } else {
-                        // Handle a successful response or other status codes accordingly
                         document.getElementById("Error").textContent = "Venue deleted successfully!";
                     }
                 })
@@ -97,14 +100,16 @@
                 method: "POST",
                 body: JSON.stringify(payload)
             })
-                .then(response => response.json()) // Parse the JSON from the response
+                .then(response => response.json())
                 .then(data => {
-                    // Check if the statusCode is 400, which indicates an error
-                    if (data.statusCode === 400 || data.statusCode === 500) {
-                        // Display the error message below the Delete Venue button
-                        document.getElementById("Error5").textContent = data.body;
+                    if (data.statusCode !== 200) {
+                        // Parse the error message from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
+
+                        // Display the error message
+                        document.getElementById("Error5").textContent = errorMessage;
                     } else {
-                        // Handle a successful response or other status codes accordingly
                         document.getElementById("Error5").textContent = "Show deleted successfully!";
                     }
                 })
@@ -130,13 +135,8 @@
             })
                 .then(response => response.json()) // Parse the JSON from the response
                 .then(data => {
-                    if (data.statusCode === 400) {
-                        // Display the error message
-                        document.getElementById("Error3").textContent = data.body;
-                    } else {
-                        // Clear previous content
-                        document.getElementById("Error3").innerHTML = '';
-
+                    if (data.statusCode === 200) {
+                        document.getElementById("Error3").textContent = '';
                         // Parse the shows array from the response body
                         let responseBody = JSON.parse(data.body);
                         let venues = responseBody.venues;
@@ -156,6 +156,18 @@
 
                         // Append the list to the Error6 element
                         document.getElementById("Error3").appendChild(list);
+
+                    } else {
+                        // Clear previous content
+                        document.getElementById("Error3").innerHTML = '';
+
+                        // Parse the shows array from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
+
+                        // Display the error message
+                        document.getElementById("Error3").textContent = errorMessage;
+
                     }
                 })
                 .catch(error => {
@@ -181,13 +193,8 @@
             })
                 .then(response => response.json()) // Parse the JSON from the response
                 .then(data => {
-                    if (data.statusCode === 400) {
-                        // Display the error message
-                        document.getElementById("Error6").textContent = data.body;
-                    } else {
-                        // Clear previous content
-                        document.getElementById("Error6").innerHTML = '';
-
+                    if (data.statusCode === 200) {
+                        document.getElementById("Error6").textContent = '';
                         // Parse the shows array from the response body
                         let responseBody = JSON.parse(data.body);
                         let shows = responseBody.shows;
@@ -207,6 +214,18 @@
 
                         // Append the list to the Error6 element
                         document.getElementById("Error6").appendChild(list);
+
+                    } else {
+                        // Clear previous content
+                        document.getElementById("Error6").innerHTML = '';
+
+                        // Parse the shows array from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
+
+                        // Display the error message
+                        document.getElementById("Error6").textContent = errorMessage;
+
                     }
                 })
                 .catch(error => {
@@ -258,12 +277,14 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Check if the statusCode is 400, which indicates an error
-                    if (data.statusCode === 400 || data.statusCode === 500) {
-                        // Display the error message below the Create Venue button
-                        document.getElementById("Error4").textContent = data.body;
+                    if (data.statusCode !== 200) {
+                        // Parse the error message from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
+
+                        // Display the error message
+                        document.getElementById("Error4").textContent = errorMessage;
                     } else {
-                        // Handle a successful response or other status codes accordingly
                         document.getElementById("Error4").textContent = "Show created successfully!";
                     }
                 })
@@ -271,7 +292,6 @@
                     // Handle any network errors
                     document.getElementById("Error4").textContent = "Network error: " + error.message;
                 });
-            console.log(JSON.stringify(response))
 
             // Clear the input fields after the operation
             document.getElementById("venuenamecreateshow").value = '';
