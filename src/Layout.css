@@ -3,7 +3,7 @@ body, html {
   margin: 0;
 
   font-family: 'serif';
-  background: linear-gradient(to right, #807AD6, #2A2D4A); /* Gradient using the first two colors of the palette */
+  background: linear-gradient(to right, #ffffff, #ffffff); /* Gradient using the first two colors of the palette */
   overflow: auto;
 }
 
@@ -24,32 +24,15 @@ body, html {
 }
 
 .seats4u {
-  font-size: 100px;
-  font-weight: 800;
-  color: #ffffff; /* Color fafcfc */
-  text-shadow: 0 0 15px #000000;
-  animation: pulse 2s infinite, colorChange 10s infinite;
-  transform-origin: 50% 50%; /* Ensure the flip happens around the center */
-}
-
-@keyframes pulse {
-  0%, 100% { text-shadow: 0 0 15px #000000; }
-  50% { text-shadow: 0 0 30px #000000; }
-}
-
-@keyframes colorChange {
-  0% { color: #CFBFFF; } 
-  20% { color: #9c94ff; } 
-  40% { color: #8f99be; } 
-  60% { color: #a8b7ff; }
-  80% { color: #b999ff; } 
-  100% { color: #80F4FF; } 
+  width: 25vw;
+  height: auto;
 }
 
 .formContainer {
   display: flex;
   justify-content: space-between;
   gap: 10px;
+  color:#f3847c;
 }
 
 .formColumn {
@@ -61,6 +44,19 @@ body, html {
   overflow-wrap: break-word; /* Breaks long words that would overflow */
   word-wrap: break-word; /* Older CSS3 property for breaking long words */
   overflow: hidden; /* Hides the content that overflows the container */
+}
+
+.border {
+  flex: 1;
+  padding: 15px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(124, 185, 190, 0.2);
+  border: 1px solid rgba(232, 243, 244, 0.3); /* Border using e8f3f4 */
+  overflow-wrap: break-word; /* Breaks long words that would overflow */
+  word-wrap: break-word; /* Older CSS3 property for breaking long words */
+  overflow: hidden; /* Hides the content that overflows the container */
+  margin-bottom: 10px;
 }
 
 .formRow {
@@ -87,13 +83,13 @@ body, html {
 }
 
 button {
-  background-color: #7cb9be; /* Button color using 7cb9be */
+  background-color: #f3847c; /* Button color using 7cb9be */
   color: white;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #6ea9a7; /* Darker shade of 7cb9be for hover effect */
+  background-color: #b7655f; /* Darker shade of 7cb9be for hover effect */
 }
 
 .input:focus, button:hover {
@@ -103,7 +99,7 @@ button:hover {
 
 .label {
   display: block;
-  color: white;
+  color: rgb(0, 0, 0);
 }
 
 .button:active {
@@ -112,8 +108,8 @@ button:hover {
 }
 
 /* Error Messages */
-#Error, #Error2, #Error3, #Error4, #Error5, #Error6 {
-  color: #ffe8ec;
+#Error, #Error2, #Error3, #Error4, #Error5, #Error6, #Error7, #Error8 {
+  color: #000000;
   margin-top: 10px;
   word-wrap: break-word; /* Breaks long words to prevent horizontal scrolling */
   margin-left: auto;
