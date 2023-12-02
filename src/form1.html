@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <script type="text/javascript">
+        // JavaScript functions here...
+    </script>
+
+    <link rel="stylesheet" href="Layout.css">
+
+    <div class="App">
+
+        <header class="App-header">
+            <img class="seats4u" src='https://seats4you.s3.amazonaws.com/Seats4u.png'></img>
+        </header>
+        <div class="formContainer">
+            <!-- Search Bar -->
+            <div class="formColumn">
+                <div class="formRow">
+                    <label class="label">Search for Shows:</label>
+                    <input placeholder="Enter show name or keywords" id="showSearch" class="input" />
+                </div>
+                    <button class="button" onClick=SearchShows(event)>Search</button>
+                    <div id="SearchResults"></div>
+            </div>
+            <!-- Click Section -->
+            <div class="formColumn">
+                <div class="formRow">
+                    <label>Not a customer?</label>
+                    <a href = "https://seats4you.s3.amazonaws.com/form.html">
+                    <label class="clickButton" >Click Here</label>
+                    </a>
+                </div>
+            </div>
+        </div>
+        </header>
+    </div>
+</body>
+
+</html>
