@@ -3,7 +3,155 @@
 
 <body>
     <script type="text/javascript">
-        // JavaScript functions here...
+
+        function ListAvailableSeats(e) {
+            e.preventDefault(); // Prevent default action of the button
+            let seatsList = document.getElementById("seatsList").value;
+
+            let payload = {
+                "showName": seatsList,
+            };
+
+            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/listAvailableSeats", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.statusCode === 200) {
+                        // Redirect only if statusCode is 200
+                        window.location.href = "https://seats4you.s3.amazonaws.com/index.html";
+                    } else {
+                        // Parse the error message from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
+                        document.getElementById("Error10").textContent = errorMessage;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("Error10").textContent = "Network error: " + error.message;
+                });
+
+            document.getElementById("seatsList").value = '';
+        }
+
+
+        function SearchShows(e) {
+            let showSearch = document.getElementById("showSearch").value;
+
+            let payload = {
+                "showName": showSearch,
+            };
+
+            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/searchShows", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json()) // Parse the JSON from the response
+                .then(data => {
+                    if (data.statusCode === 200) {
+                        document.getElementById("SearchResults").textContent = '';
+                        let shows = data.constants; // Adjusted to match the provided JSON payload structure
+
+                        shows.forEach(show => {
+                            let showDiv = document.createElement('div');
+                            showDiv.style.border = '1px solid #ddd'; // Style the div
+                            showDiv.style.padding = '10px';
+                            showDiv.style.marginBottom = '10px';
+
+                            let title = document.createElement('h3');
+                            title.textContent = show.showName;
+                            showDiv.appendChild(title);
+
+                            let venue = document.createElement('p');
+                            venue.textContent = "Venue: " + show.venueName;
+                            showDiv.appendChild(venue);
+
+                            let location = document.createElement('p');
+                            location.textContent = "Location: " + show.Location;
+                            showDiv.appendChild(location);
+
+                            let date = document.createElement('p');
+                            date.textContent = "Date: " + show.date;
+                            showDiv.appendChild(date);
+
+                            let time = document.createElement('p');
+                            time.textContent = "Time: " + show.time;
+                            showDiv.appendChild(time);
+
+                            let price = document.createElement('p');
+                            price.textContent = "Price: $" + show.price.toFixed(2);
+                            showDiv.appendChild(price);
+
+                            // Append the show div to the SearchResults element
+                            document.getElementById("SearchResults").appendChild(showDiv);
+                        });
+
+                    } else {
+                        document.getElementById("SearchResults").innerHTML = '';
+                        let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
+                        document.getElementById("SearchResults").textContent = errorMessage;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("SearchResults").textContent = "Network error: " + error.message;
+                });
+
+            document.getElementById("showSearch").value = '';
+        }
+
+
+        function ListActiveShows(e) {
+
+            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/listActiveShows", {
+                method: "GET",
+            })
+                .then(response => response.json()) // Parse the JSON from the response
+                .then(data => {
+                    if (data.statusCode === 200) {
+                        document.getElementById("Error9").textContent = '';
+                        // Parse the shows array from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let shows = responseBody.shows;
+
+                        // Create a list element
+                        let list = document.createElement('ul');
+                        list.style.listStyleType = 'none'; // Remove bullet points
+                        list.style.padding = '0'; // Remove default padding
+
+                        // Iterate over the shows array and append each show as a list item
+                        shows.forEach(show => {
+                            let listItem = document.createElement('li');
+                            listItem.textContent = show;
+                            listItem.style.marginBottom = '10px'; // Space between items
+                            list.appendChild(listItem);
+                        });
+
+                        // Append the list to the Error6 element
+                        document.getElementById("Error9").appendChild(list);
+
+                    } else {
+                        // Clear previous content
+                        document.getElementById("Error9").innerHTML = '';
+
+                        // Parse the shows array from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
+
+                        // Display the error message
+                        document.getElementById("Error9").textContent = errorMessage;
+
+                    }
+                })
+                .catch(error => {
+                    // Handle any network errors
+                    document.getElementById("Error9").textContent = "Network error: " + error.message;
+                });
+        }
+
+
+
     </script>
 
     <link rel="stylesheet" href="Layout.css">
@@ -16,19 +164,37 @@
         <div class="formContainer">
             <!-- Search Bar -->
             <div class="formColumn">
-                <div class="formRow">
-                    <label class="label">Search for Shows:</label>
-                    <input placeholder="Enter show name or keywords" id="showSearch" class="input" />
-                </div>
+                <div class="border">
+                    <div class="formRow">
+                        <label class="label">Search for Shows:</label>
+                        <input placeholder="Enter show name or keywords" id="showSearch" class="input" />
+                    </div>
                     <button class="button" onClick=SearchShows(event)>Search</button>
                     <div id="SearchResults"></div>
+                </div>
+                <div class="border">
+                    <div class="formRow">
+                        <label class="label">List Active Shows:</label>
+                    </div>
+                    <button class="listActiveShowsButton" onClick=ListActiveShows(event)>List Active Shows</button>
+                    <div id="Error9"></div>
+                </div>
+
+                <div class="border">
+                    <div class="formRow">
+                        <label class="label">List Available Seats:</label>
+                        <input placeholder="Enter show name" id="seatsList" class="input" />
+                    </div>
+                        <button class="button" onClick=ListAvailableSeats(event)>List Available Seats</button>
+                    <div id="Error10"></div>
+                </div>
             </div>
             <!-- Click Section -->
             <div class="formColumn">
                 <div class="formRow">
                     <label>Not a customer?</label>
-                    <a href = "https://seats4you.s3.amazonaws.com/form.html">
-                    <label class="clickButton" >Click Here</label>
+                    <a href="https://seats4you.s3.amazonaws.com/form.html">
+                        <label class="clickButton">Click Here</label>
                     </a>
                 </div>
             </div>
