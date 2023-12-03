@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venue App</title>
+    <link rel="stylesheet" href="App.css"> <!-- Make sure this path is correct -->
+    <script src="path/to/your/javascript.js"></script> <!-- Link to your JavaScript file -->
+</head>
+<body>
+    <div class="App">
+        <canvas id="venueCanvas" tabIndex="1" class="App-canvas" width="1200" height="800"></canvas>
+        <header class="App-header">
+            <img id="sold" src="sold.png" alt="hidden" hidden>
+        </header>
+    </div>
+
+    <script>
+        // JavaScript code to initialize and redraw the canvas.
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const venue = new Venue(venueConfig); // assuming Venue and venueConfig are defined in your linked JavaScript file
+            const canvas = document.getElementById('venueCanvas');
+            redrawCanvas(venue, canvas); // assuming redrawCanvas is defined in your linked JavaScript file
+        });
+    </script>
+</body>
+</html>
