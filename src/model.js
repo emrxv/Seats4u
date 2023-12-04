@@ -63,15 +63,15 @@ export class Venue {
             let nr, nc;
     
             if (l === 0) { // sideLeft
-                nr = config.endRowColL.split("", 2)[0].charCodeAt(0) - 65;
+                nr = config.endRowColL.split("", 2)[0].charCodeAt(0) - 64;
                 nc = parseInt(config.endRowColL.split("", 2)[1]);
                 this.sideLeft = Array.from(Array(nr), () => new Array(nc));
             } else if (l === 1) { // center
-                nr = config.endRowColC.split("", 2)[0].charCodeAt(0) - 65;
+                nr = config.endRowColC.split("", 2)[0].charCodeAt(0) - 64;
                 nc = parseInt(config.endRowColC.split("", 2)[1]);
                 this.center = Array.from(Array(nr), () => new Array(nc));
             } else if (l === 2) { // sideRight
-                nr = config.endRowColR.split("", 2)[0].charCodeAt(0) - 65;
+                nr = config.endRowColR.split("", 2)[0].charCodeAt(0) - 64;
                 nc = parseInt(config.endRowColR.split("", 2)[1]);
                 this.sideRight = Array.from(Array(nr), () => new Array(nc));
             }

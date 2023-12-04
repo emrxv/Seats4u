@@ -1,12 +1,18 @@
 import React from 'react';
 import './App.css';
-import { venueConfig, venueConfig_big} from './seatsConfig.js'
+import {venueConfig} from './seatsConfig.js'
 import { Venue } from './model.js'
 import { redrawCanvas } from './Boundary.js'
 import sold from './sold.png'
 
 function App() {
-  const [venue, setModel] = React.useState(new Venue(venueConfig));
+  //const updatedVenueConfig = window.updatedVenueConfig;
+
+  const updatedVenueConfig = JSON.parse(localStorage.getItem('updatedVenueConfig'));
+
+  console.log(updatedVenueConfig);
+
+  const [venue, setModel] = React.useState(new Venue(updatedVenueConfig));
   const [redraw, forceRedraw] = React.useState(0);       // used to conveniently request redraw after model change
   const appRef = React.useRef(null);
   const canvasRef = React.useRef(null);   // need to be able to refer to Canvas

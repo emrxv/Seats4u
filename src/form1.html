@@ -12,17 +12,35 @@
                 "showName": seatsList,
             };
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/listAvailableSeats", {
+            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/showAvailableSeats", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
                 .then(response => response.json())
                 .then(data => {
                     if (data.statusCode === 200) {
+                        // Parse the data and prepare it to be sent to the server for file update
+
+                        const updatedVenueConfig = {
+                            "endRowColL": data.Dimentions[0].endRowColL,
+                            "endRowColC": data.Dimentions[0].endRowColC,
+                            "endRowColR": data.Dimentions[0].endRowColR
+                        };
+
+
+                        localStorage.setItem('updatedVenueConfig', JSON.stringify(updatedVenueConfig));
+
+                        // You would typically send this updated configuration to your server here
+                        // For example, using another fetch request to an API endpoint that handles file updates
+                        // fetch('/api/updateVenueConfig', { method: 'POST', body: JSON.stringify(updatedVenueConfig) })
+
+                        console.log(updatedVenueConfig); // For debugging
+
                         // Redirect only if statusCode is 200
                         window.location.href = "https://seats4you.s3.amazonaws.com/index.html";
                     } else {
                         // Parse the error message from the response body
+
                         let responseBody = JSON.parse(data.body);
                         let errorMessage = responseBody.Error;
                         document.getElementById("Error10").textContent = errorMessage;
@@ -34,6 +52,7 @@
 
             document.getElementById("seatsList").value = '';
         }
+
 
 
         function SearchShows(e) {
@@ -185,7 +204,7 @@
                         <label class="label">List Available Seats:</label>
                         <input placeholder="Enter show name" id="seatsList" class="input" />
                     </div>
-                        <button class="button" onClick=ListAvailableSeats(event)>List Available Seats</button>
+                    <button class="button" onClick=ListAvailableSeats(event)>List Available Seats</button>
                     <div id="Error10"></div>
                 </div>
             </div>

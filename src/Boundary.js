@@ -1,6 +1,6 @@
 /** Draw the Venue */
 export function drawVenue (venue, ctx) {    
-    drawStage(ctx, venue.center[1].length, venue.sideLeft[1].length);
+    drawStage(ctx, venue.center[0].length, venue.sideLeft[0].length);
 
     drawSections(ctx, venue.sideLeft, 0);
     drawSections(ctx, venue.center, venue.sideLeft[0].length*30 + 50);
@@ -78,4 +78,5 @@ export function redrawCanvas(venue, canvasObj, image) {
     if (venue) { 
         drawVenue(venue, ctx, image);
     }
+
 }
