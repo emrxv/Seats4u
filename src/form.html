@@ -77,7 +77,88 @@
                     document.getElementById("Error11").textContent = "Network error: " + error.message;
                 });
 
+            document.getElementById("GenerateShowsName").value = '';
             document.getElementById("adminpass3").value = '';
+        }
+
+
+        function VMGenerateShowsReport(e) {
+            let venuegeneratename = document.getElementById("venuegeneratename").value;
+            let managerpass6 = document.getElementById("managerpass6").value;
+
+            let payload = {
+                "venueName": venuegeneratename,
+                "managerPassword": managerpass6,
+            };
+
+            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/vmGeneratesShowsReport", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json()) // Parse the JSON from the response
+                .then(data => {
+                    if (data.statusCode === 200) {
+                        document.getElementById("Error12").textContent = '';
+                        let reportData = JSON.parse(data.body); // Parse the body to get the report data
+
+                        // Iterate over each venue
+                        for (let venue in reportData) {
+                            let venueDiv = document.createElement('div');
+                            venueDiv.style.border = '1px solid #ddd'; // Style the venue div
+                            venueDiv.style.padding = '10px';
+                            venueDiv.style.marginBottom = '10px';
+
+                            let venueTitle = document.createElement('h2');
+                            venueTitle.textContent = venue;
+                            venueDiv.appendChild(venueTitle);
+
+                            // Iterate over shows in each venue
+                            reportData[venue].forEach(show => {
+                                let showDiv = document.createElement('div');
+                                showDiv.style.border = '1px solid #ccc'; // Style the show div
+                                showDiv.style.padding = '5px';
+                                showDiv.style.marginBottom = '5px';
+
+                                let title = document.createElement('h3');
+                                title.textContent = show.showName;
+                                showDiv.appendChild(title);
+
+                                let proceedings = document.createElement('p');
+                                proceedings.textContent = "Proceedings: $" + show.proceedings.toFixed(2);
+                                showDiv.appendChild(proceedings);
+
+                                let remainingSeats = document.createElement('p');
+                                remainingSeats.textContent = "Remaining Seats: " + show.remainingSeats;
+                                showDiv.appendChild(remainingSeats);
+
+                                let soldSeats = document.createElement('p');
+                                soldSeats.textContent = "Sold Seats: " + show.soldSeats;
+                                showDiv.appendChild(soldSeats);
+
+                                // Append the show div to the venue div
+                                venueDiv.appendChild(showDiv);
+                            });
+
+                            // Append the venue div to the SearchResults element
+                            document.getElementById("Error12").appendChild(venueDiv);
+                        }
+
+                    } else {
+                        document.getElementById("Error12").textContent = '';
+                       // Parse the error message from the response body
+                       let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
+
+                        // Display the error message
+                        document.getElementById("Error12").textContent = errorMessage;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("Error12").textContent = "Network error: " + error.message;
+                });
+
+            document.getElementById("venuegeneratename").value = '';
+            document.getElementById("venuegeneratename").value = '';
         }
 
 
@@ -518,6 +599,18 @@
                     </div>
                     <button class="deleteVenueButton" onClick=DeleteVenue(event)>Delete Venue</button>
                     <div id="Error"></div>
+                </div>
+                <div class="border">
+                    <div class="formRow">
+                        <label class="label">Name:</label>
+                        <input placeholder="Enter Venue Name" id="venuegeneratename" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <label class="label">Password:</label>
+                        <input placeholder="Enter Venue Password" id="managerpass6" type="password" class="input" />
+                    </div>
+                    <button class="VMgenerateShowsReportButton" onClick=VMGenerateShowsReport(event)>Generate Shows Report</button>
+                    <div id="Error12"></div>
                 </div>
             </div>
             <div class="formColumn">
