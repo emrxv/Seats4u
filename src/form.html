@@ -4,9 +4,11 @@
     <script type="text/javascript">
 
         function GenerateShowsReport(e) {
+            let GenerateShowsName = document.getElementById("GenerateShowsName").value;
             let adminpass3 = document.getElementById("adminpass3").value;
 
             let payload = {
+                "venueName": GenerateShowsName,
                 "adminPassword": adminpass3,
             };
 
@@ -610,6 +612,10 @@
                     <div id="Error8"></div>
                 </div>
                 <div class="border">
+                    <div class="formRow">
+                        <label class="label">Name:</label>
+                        <input placeholder="Enter Venue Name" id="GenerateShowsName" class="input" />
+                    </div>
                     <div class="formRow">
                         <label class="label">Password:</label>
                         <input placeholder="Enter Admin Password" id="adminpass3" type="password" class="input" />

@@ -5,7 +5,6 @@
     <script type="text/javascript">
 
         function ListAvailableSeats(e) {
-            e.preventDefault(); // Prevent default action of the button
             let seatsList = document.getElementById("seatsList").value;
 
             let payload = {
@@ -19,7 +18,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.statusCode === 200) {
-                    document.getElementById("availableSeatsResults").textContent = '';
+                   // document.getElementById("Error10").textContent = '';
                     let availSeats = data.AvailableSeats;
                     console.log(availSeats);
                         // Parse the data and prepare it to be sent to the server for file update
@@ -42,36 +41,11 @@
                         layoutSide.textContent = "layout location: " + availSeats.layoutSide;
                         seatsDiv.appendChild(layoutSide);
 
-                        document.getElementById("availableSeatsResults").appendChild(seatsDiv);
+                        document.getElementById("Error10").appendChild(seatsDiv);
                     });
 
-                        const updatedVenueConfig = {
-                            "endRowColL": data.Dimentions[0].endRowColL,
-                            "endRowColC": data.Dimentions[0].endRowColC,
-                            "endRowColR": data.Dimentions[0].endRowColR
-                        };
-                        //for (let x = 0; x < data.AvailableSeats.length) {
-                            const availableSeats = {
-                                "row" : data.AvailableSeats[x].row,
-                                "column" : data.AvailableSeats[x].column,
-                                "layoutSide" : data.AvailableSeats[x].layoutSide
 
-                            }
-
-                        //}   
-
-                        localStorage.setItem('updatedVenueConfig', JSON.stringify(updatedVenueConfig));
-
-                        // You would typically send this updated configuration to your server here
-                        // For example, using another fetch request to an API endpoint that handles file updates
-                        // fetch('/api/updateVenueConfig', { method: 'POST', body: JSON.stringify(updatedVenueConfig) })
-
-                        console.log(updatedVenueConfig); // For debugging
-
-                        // Redirect only if statusCode is 200
-                        window.location.href = "https://seats4you.s3.amazonaws.com/index.html";
                     } else {
-                        // Parse the error message from the response body
 
                         let responseBody = JSON.parse(data.body);
                         let errorMessage = responseBody.Error;
