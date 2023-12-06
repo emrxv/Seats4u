@@ -182,6 +182,7 @@
 
             for (let x = 0; x < seatsInfo.split(",").length; x = x + 3) {
                 let seat = {
+                    "showName": showFrom,
                     "row" : seatsInfo.split(",")[x],
                     "column" : seatsInfo.split(",")[x+1],
                     "layoutSide" : seatsInfo.split(",")[x+2]
@@ -190,7 +191,6 @@
             }
 
             let payload = {
-                "showName": showFrom,
                 "seats" : seats
             };
             console.log(payload);
@@ -204,6 +204,8 @@
                     if (data.statusCode === 200) {
                         document.getElementById("Error11").textContent = '';
                         let shows = data.constants; // Adjusted to match the provided JSON payload structure
+                        let responseBody = JSON.parse(data.body);
+                        document.getElementById("Error11").textContent = responseBody;
 
                     } else {
                         document.getElementById("Error11").innerHTML = '';
