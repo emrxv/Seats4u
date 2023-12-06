@@ -18,7 +18,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.statusCode === 200) {
-                   // document.getElementById("Error10").textContent = '';
+                        document.getElementById("Error10").textContent = "";
                     let availSeats = data.AvailableSeats;
                     console.log(availSeats);
                         // Parse the data and prepare it to be sent to the server for file update
@@ -46,7 +46,7 @@
 
 
                     } else {
-
+                        document.getElementById("Error10").textContent = "";
                         let responseBody = JSON.parse(data.body);
                         let errorMessage = responseBody.Error;
                         document.getElementById("Error10").textContent = errorMessage;
