@@ -180,6 +180,11 @@
                 "endRowColC": endrowcolC,
             };
 
+            let seatsPayload = {
+                // this is where I am going to add all seats defined by the section endRowsCols
+                // and send them in (maybe using another lambda function that puts seats in the DB?)
+            }
+
             fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/createVenue", {
                 method: "POST",
                 body: JSON.stringify(payload)
@@ -509,6 +514,12 @@
                 "managerPassword": showcreatepass,
             }
             console.log(payload)
+
+            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+
             fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/createShow", {
                 method: "POST",
                 body: JSON.stringify(payload)
