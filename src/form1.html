@@ -11,7 +11,7 @@
                 "showName": seatsList,
             };
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/showAvailableSeats", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/showAvailableSeats", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
@@ -68,7 +68,7 @@
                 "showName": showSearch,
             };
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/searchShows", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/searchShows", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
@@ -129,7 +129,7 @@
 
         function ListActiveShows(e) {
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/listActiveShows", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/listActiveShows", {
                 method: "GET",
             })
                 .then(response => response.json()) // Parse the JSON from the response
@@ -195,7 +195,7 @@
             };
             console.log(payload);
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/purchaseSeats", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/purchaseSeats", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })

@@ -12,7 +12,7 @@
                 "adminPassword": adminpass3,
             };
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/generateShowsReport", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/generateShowsReport", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
@@ -91,7 +91,7 @@
                 "managerPassword": managerpass6,
             };
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/vmGeneratesShowsReport", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/vmGeneratesShowsReport", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
@@ -185,7 +185,7 @@
                 // and send them in (maybe using another lambda function that puts seats in the DB?)
             }
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/createVenue", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/createVenue", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
@@ -226,7 +226,7 @@
                 "managerPassword": managerpass2,
             };
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/deleteVenue", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/deleteVenue", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
@@ -261,7 +261,7 @@
                 "managerPassword": managerpass3,
             };
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/deleteShow", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/deleteShow", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
@@ -296,7 +296,7 @@
                 "adminPassword": adminpass2,
             };
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/deleteShowA", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/deleteShowA", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
@@ -331,7 +331,7 @@
                 "managerPassword": managerpass5,
             };
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/activateShow", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/activateShow", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
@@ -364,7 +364,7 @@
                 "adminPassword": adminpass,
             };
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/listVenues", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/listVenues", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
@@ -430,7 +430,7 @@
                 "managerPassword": managerpass4,
             };
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/listShows", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/listShows", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
@@ -512,12 +512,29 @@
             }
             console.log(payload)
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/fillSeats", {
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/fillSeats", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
+            .then(response => response.json())
+                .then(data => {
+                    if (data.statusCode !== 200) {
+                        // Parse the error message from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
 
-            fetch("https://lus8hhd6fi.execute-api.us-east-1.amazonaws.com/seats4uSTAGE/createShow", {
+                        // Display the error message
+                        document.getElementById("Error4").textContent = errorMessage;
+                    } else {
+                        document.getElementById("Error4").textContent = "Seats filled successfully!";
+                    }
+                })
+                .catch(error => {
+                    // Handle any network errors
+                    document.getElementById("Error4").textContent = "Network error: " + error.message;
+                });
+
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/createShow", {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
@@ -531,7 +548,7 @@
                         // Display the error message
                         document.getElementById("Error4").textContent = errorMessage;
                     } else {
-                        document.getElementById("Error4").textContent = "Show created successfully!";
+                       document.getElementById("Error4").textContent = "Show created successfully!";
                     }
                 })
                 .catch(error => {
@@ -542,7 +559,6 @@
             // Clear the input fields after the operation
             document.getElementById("venuenamecreateshow").value = '';
             document.getElementById("showname").value = '';
-            document.getElementById("active").value = '';
             document.getElementById("date").value = '';
             document.getElementById("time").value = '';
             document.getElementById("price").value = '';
