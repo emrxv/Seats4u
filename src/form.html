@@ -126,6 +126,16 @@
                                 let proceedings = document.createElement('p');
                                 proceedings.textContent = "Proceedings: $" + show.proceedings.toFixed(2);
                                 showDiv.appendChild(proceedings);
+                                
+                                let active = document.createElement('a');
+                                let activity = null;
+                                if (show.active === 1){
+                                    activity = true; 
+                                } else {
+                                    activity = false; 
+                                }
+                                active.textContent = "Status: " + activity;
+                                showDiv.appendChild(active);
 
                                 let remainingSeats = document.createElement('p');
                                 remainingSeats.textContent = "Remaining Seats: " + show.remainingSeats;
@@ -480,16 +490,6 @@
             document.getElementById("managerpass4").value = '';
         }
 
-        function generateUUID() {
-            let array = new Uint8Array(16);
-            window.crypto.getRandomValues(array);
-            array[6] = (array[6] & 0x0f) | 0x40; // Version 4 UUID
-            array[8] = (array[8] & 0x3f) | 0x80; // Variant 10xx (RFC 4122)
-
-            let hexArray = Array.from(array, byte => byte.toString(16).padStart(2, '0'));
-            return `${hexArray.slice(0, 4).join('')}-${hexArray.slice(4, 6).join('')}-${hexArray.slice(6, 8).join('')}-${hexArray.slice(8, 10).join('')}-${hexArray.slice(10, 16).join('')}`;
-        }
-
         function CreateShow(e) {
             let venuenamecreateshow = document.getElementById("venuenamecreateshow").value;
             let showname = document.getElementById("showname").value;
@@ -497,7 +497,6 @@
             let time = document.getElementById("time").value;
             let price = document.getElementById("price").value;
             let showcreatepass = document.getElementById("showcreatepass").value;
-            var remainID = generateUUID();
 
             payload = {
                 "showName": showname,
@@ -506,7 +505,7 @@
                 "proceedings": 0,
                 "date": date,
                 "time": time,
-                "remainID": remainID,
+                "remainID": 0,
                 "price": price,
                 "managerPassword": showcreatepass,
             }
@@ -515,24 +514,7 @@
             fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/fillSeats", {
                 method: "POST",
                 body: JSON.stringify(payload)
-            })
-            .then(response => response.json())
-                .then(data => {
-                    if (data.statusCode !== 200) {
-                        // Parse the error message from the response body
-                        let responseBody = JSON.parse(data.body);
-                        let errorMessage = responseBody.Error;
-
-                        // Display the error message
-                        document.getElementById("Error4").textContent = errorMessage;
-                    } else {
-                        document.getElementById("Error4").textContent = "Seats filled successfully!";
-                    }
-                })
-                .catch(error => {
-                    // Handle any network errors
-                    document.getElementById("Error4").textContent = "Network error: " + error.message;
-                });
+            });
 
             fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/createShow", {
                 method: "POST",
