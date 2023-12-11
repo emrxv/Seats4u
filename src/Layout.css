@@ -59,9 +59,33 @@ body, html {
   margin-bottom: 10px;
 }
 
+.border_2 {
+  flex: 1;
+  padding: 15px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(124, 185, 190, 0.2);
+  border: 1px solid rgba(232, 243, 244, 0.3);
+  /* Border using e8f3f4 */
+  overflow-wrap: break-word;
+  /* Breaks long words that would overflow */
+  word-wrap: break-word;
+  /* Older CSS3 property for breaking long words */
+  overflow: hidden;
+  /* Hides the content that overflows the container */
+  margin-bottom: 10px;
+  display: none;
+}
+
 .formRow {
   margin-bottom: 10px;
   transition: transform 0.3s;
+}
+
+.formRow_2 {
+  margin-bottom: 10px;
+  transition: transform 0.3s;
+  display: none;
 }
 
 .formRow:hover {
@@ -141,4 +165,21 @@ button:hover {
   }
 }
 
+.seat {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+}
 
+.label2 {
+  font-size: 10px;
+  position: absolute;
+  left: 50%;
+  top: -50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.display {
+  display: none;
+}
