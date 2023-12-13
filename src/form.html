@@ -803,6 +803,48 @@
                 </div>
                 <div class="border">
                     <div class="formRow">
+                        <label class="label">Name:</label>
+                        <input placeholder="Enter Show Name" id="showdeletename" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <label class="label">Password:</label>
+                        <input placeholder="Enter Venue Password" id="managerpass3" type="password" class="input" />
+                    </div>
+                    <button class="deleteShowButton" onClick=DeleteShow(event)>Delete Show</button>
+                    <div id="Error5"></div>
+                </div>
+                <div class="border">
+                    <div class="formRow">
+                        <label class="label">Name:</label>
+                        <input placeholder="Enter Venue Name" id="showlistname" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <label class="label">Password:</label>
+                        <input placeholder="Enter Venue Password" id="managerpass4" type="password" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <button class="listShowsButton" onClick=ListShows(event)>List Shows</button>
+                        <div id="Error6"></div>
+                    </div>
+                </div>
+                <div class="border">
+                    <div class="formRow">
+                        <label class="label">Name:</label>
+                        <input placeholder="Enter Show Name" id="activateshowname" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <label class="label">Password:</label>
+                        <input placeholder="Enter Venue Password" id="managerpass5" type="password" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <button class="activateShowButton" onClick=ActivateShow(event)>Activate Show</button>
+                        <div id="Error7"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="formColumn">
+                <div class="border">
+                    <div class="formRow">
                         <label class="label">Show Name:</label>
                         <input placeholder="Enter Show Name" id="createblockshowname" class="input" />
                     </div>
@@ -861,46 +903,6 @@
                     <div class="formRow">
                         <button class="listBlockButton" onClick=ListBlocks(event)>List Blocks</button>
                         <div id="Error10"></div>
-                    </div>
-                </div>
-                <div class="border">
-                    <div class="formRow">
-                        <label class="label">Name:</label>
-                        <input placeholder="Enter Show Name" id="showdeletename" class="input" />
-                    </div>
-                    <div class="formRow">
-                        <label class="label">Password:</label>
-                        <input placeholder="Enter Venue Password" id="managerpass3" type="password" class="input" />
-                    </div>
-                    <button class="deleteShowButton" onClick=DeleteShow(event)>Delete Show</button>
-                    <div id="Error5"></div>
-                </div>
-                <div class="border">
-                    <div class="formRow">
-                        <label class="label">Name:</label>
-                        <input placeholder="Enter Venue Name" id="showlistname" class="input" />
-                    </div>
-                    <div class="formRow">
-                        <label class="label">Password:</label>
-                        <input placeholder="Enter Venue Password" id="managerpass4" type="password" class="input" />
-                    </div>
-                    <div class="formRow">
-                        <button class="listShowsButton" onClick=ListShows(event)>List Shows</button>
-                        <div id="Error6"></div>
-                    </div>
-                </div>
-                <div class="border">
-                    <div class="formRow">
-                        <label class="label">Name:</label>
-                        <input placeholder="Enter Show Name" id="activateshowname" class="input" />
-                    </div>
-                    <div class="formRow">
-                        <label class="label">Password:</label>
-                        <input placeholder="Enter Venue Password" id="managerpass5" type="password" class="input" />
-                    </div>
-                    <div class="formRow">
-                        <button class="activateShowButton" onClick=ActivateShow(event)>Activate Show</button>
-                        <div id="Error7"></div>
                     </div>
                 </div>
             </div>
