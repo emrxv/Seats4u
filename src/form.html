@@ -65,8 +65,8 @@
                         }
 
                     } else {
-                       // Parse the error message from the response body
-                       let responseBody = JSON.parse(data.body);
+                        // Parse the error message from the response body
+                        let responseBody = JSON.parse(data.body);
                         let errorMessage = responseBody.Error;
 
                         // Display the error message
@@ -126,13 +126,13 @@
                                 let proceedings = document.createElement('p');
                                 proceedings.textContent = "Proceedings: $" + show.proceedings.toFixed(2);
                                 showDiv.appendChild(proceedings);
-                                
+
                                 let active = document.createElement('a');
                                 let activity = null;
-                                if (show.active === 1){
-                                    activity = true; 
+                                if (show.active === 1) {
+                                    activity = true;
                                 } else {
-                                    activity = false; 
+                                    activity = false;
                                 }
                                 active.textContent = "Status: " + activity;
                                 showDiv.appendChild(active);
@@ -155,8 +155,8 @@
 
                     } else {
                         document.getElementById("Error12").textContent = '';
-                       // Parse the error message from the response body
-                       let responseBody = JSON.parse(data.body);
+                        // Parse the error message from the response body
+                        let responseBody = JSON.parse(data.body);
                         let errorMessage = responseBody.Error;
 
                         // Display the error message
@@ -530,7 +530,7 @@
                         // Display the error message
                         document.getElementById("Error4").textContent = errorMessage;
                     } else {
-                       document.getElementById("Error4").textContent = "Show created successfully!";
+                        document.getElementById("Error4").textContent = "Show created successfully!";
                     }
                 })
                 .catch(error => {
@@ -545,6 +545,153 @@
             document.getElementById("time").value = '';
             document.getElementById("price").value = '';
             document.getElementById("showcreatepass").value = '';
+        }
+
+        function CreateBlock(e) {
+            let showname = document.getElementById("createblockshowname").value;
+            let blockname = document.getElementById("createblockname").value;
+            let layoutSide = document.getElementById("createblocklayoutsection").value;
+            let rows = document.getElementById("createblockrows").value;
+            let price = document.getElementById("createblockprice").value;
+            let managerpass7 = document.getElementById("managerpass7").value;
+            console.log("Block Name:", blockname); // Add this line for debugging
+
+            let blocks = [];
+
+            for (let x = 0; x < rows.split(",").length; x++) {
+                let row = rows.split(",")[x];
+                let block = {
+                    "BlockID": 0,
+                    "showName": showname,
+                    "layoutSide": layoutSide,
+                    "row": row,
+                    "Price": price
+                }
+                blocks.push(block);
+            }
+
+            payload = {
+                "showName": showname,
+                "managerPassword": managerpass7,
+                "blockName": blockname,
+                "blocks": blocks
+            }
+
+            console.log(payload);
+
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/createBlock", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Server error: " + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Check if the response indicates success
+                    if (data.statusCode === 200) {
+                        document.getElementById("Error8").textContent = "Block created successfully!";
+                    }
+                    if (data.statusCode !== 200) {
+                        // Parse the error message from the response body
+                        let responseBody = JSON.parse(data.body);
+                        console.log(responseBody)
+                        //let errorMessage = responseBody.Error;
+
+                        // Display the error message
+                        document.getElementById("Error8").textContent = responseBody.body;
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    document.getElementById("Error8").textContent = "Error: " + error.message; // Log the specific error message.
+                })
+
+            // Clear the input fields after the operation
+            document.getElementById("createblockshowname").value = '';
+            document.getElementById("createblockname").value = '';
+            document.getElementById("createblocklayoutsection").value = '';
+            document.getElementById("createblockrows").value = '';
+            document.getElementById("createblockprice").value = '';
+            document.getElementById("managerpass7").value = '';
+        }
+
+        function DeleteBlock(e) {
+            let showname = document.getElementById("deleteblockshowname").value;
+            let blockname = document.getElementById("deleteblockname").value;
+            let managerpass8 = document.getElementById("managerpass8").value;
+
+            payload = {
+                "showName": showname,
+                "blockName": blockname,
+                "managerPassword": managerpass8
+            }
+
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/deleteBlock", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.statusCode !== 200) {
+                        // Parse the error message from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
+
+                        // Display the error message
+                        document.getElementById("Error9").textContent = errorMessage;
+                    } else {
+                        document.getElementById("Error9").textContent = "Block deleted successfully!";
+                    }
+                })
+                .catch(error => {
+                    // Handle any network errors
+                    document.getElementById("Error9").textContent = "Network error: " + error.message;
+                });
+
+            // Clear the input fields after the operation
+            document.getElementById("deleteblockshowname").value = '';
+            document.getElementById("deleteblockname").value = '';
+            document.getElementById("managerpass8").value = '';
+        }
+
+        function ListBlocks(e) {
+            let showname = document.getElementById("listblockshowname").value;
+            let managerpass9 = document.getElementById("managerpass9").value;
+
+            payload = {
+                "showName": showname,
+                "managerPassword": managerpass9
+            }
+
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/listBlocks", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.statusCode === 200) {
+                        document.getElementById("Error10").textContent = '';
+                        console.log('data.body' + data.body);
+                        // I was not able to get this working tonight (meaning it does not display what I want it to)
+                    } else {
+                        let responseBody = JSON.parse(data.body);
+                        console.log(responseBody);
+                        let errorMessage = responseBody.Error || "Unknown error";
+                        console.log(errorMessage);
+                        document.getElementById("Error10").textContent = errorMessage;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("Error10").textContent = "Network error: " + error.message;
+                    console.log(error.message);
+                    console.log(error);
+                });
+
+            document.getElementById("listblockshowname").value = '';
+            document.getElementById("managerpass9").value = '';
         }
 
     </script>
@@ -620,7 +767,8 @@
                         <label class="label">Password:</label>
                         <input placeholder="Enter Venue Password" id="managerpass6" type="password" class="input" />
                     </div>
-                    <button class="VMgenerateShowsReportButton" onClick=VMGenerateShowsReport(event)>Generate Shows Report</button>
+                    <button class="VMgenerateShowsReportButton" onClick=VMGenerateShowsReport(event)>Generate Shows
+                        Report</button>
                     <div id="Error12"></div>
                 </div>
             </div>
@@ -652,6 +800,68 @@
                     </div>
                     <button class="createShowButton" onClick=CreateShow(event)>Create Show</button>
                     <div id="Error4"></div>
+                </div>
+                <div class="border">
+                    <div class="formRow">
+                        <label class="label">Show Name:</label>
+                        <input placeholder="Enter Show Name" id="createblockshowname" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <label class="label">Block Name:</label>
+                        <input placeholder="Enter Block Name" id="createblockname" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <label class="label">Row(s):</label>
+                        <input placeholder="Enter Row(s)" id="createblockrows" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <label class="label">Layout Section:</label>
+                        <input placeholder="Enter Layout Section" id="createblocklayoutsection" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <label class="label">Price:</label>
+                        <input placeholder="Enter Price" id="createblockprice" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <label class="label">Password:</label>
+                        <input placeholder="Enter Venue Password" id="managerpass7" type="password" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <button class="createBlockButton" onClick=CreateBlock(event)>Create Block</button>
+                        <div id="Error8"></div>
+                    </div>
+                </div>
+                <div class="border">
+                    <div class="formRow">
+                        <label class="label">Show Name:</label>
+                        <input placeholder="Enter Show Name" id="deleteblockshowname" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <label class="label">Block Name:</label>
+                        <input placeholder="Enter Block Name" id="deleteblockname" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <label class="label">Password:</label>
+                        <input placeholder="Enter Venue Password" id="managerpass8" type="password" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <button class="deleteBlockButton" onClick=DeleteBlock(event)>Delete Block</button>
+                        <div id="Error9"></div>
+                    </div>
+                </div>
+                <div class="border">
+                    <div class="formRow">
+                        <label class="label">Show Name:</label>
+                        <input placeholder="Enter Show Name" id="listblockshowname" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <label class="label">Password:</label>
+                        <input placeholder="Enter Venue Password" id="managerpass9" type="password" class="input" />
+                    </div>
+                    <div class="formRow">
+                        <button class="listBlockButton" onClick=ListBlocks(event)>List Blocks</button>
+                        <div id="Error10"></div>
+                    </div>
                 </div>
                 <div class="border">
                     <div class="formRow">
