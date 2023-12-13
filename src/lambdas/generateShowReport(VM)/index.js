@@ -1,0 +1,120 @@
+const mysql = require('mysql');
+const db_access = require('/opt/nodejs/db_access');
+
+exports.handler = async (event) => {
+    var pool = mysql.createPool({
+        host: db_access.config.host,
+        user: db_access.config.user,
+        password: db_access.config.password,
+        database: db_access.config.database
+    });
+
+    let validateManager = () => {
+        return new Promise((resolve, reject) => {
+            if (!event.managerPassword) {
+                return reject({
+                    statusCode: 400,
+                    body: JSON.stringify({ Error: "No manager password provided." })
+                });
+            }
+            
+            pool.query("SELECT managerPassword, venueName FROM  Seats4u.Venue WHERE managerPassword = ? AND venueName =? ", [event.managerPassword, event.venueName], (error, rows) => {
+                if (error) {
+                    return reject({
+                        statusCode: 500,
+                        body: JSON.stringify({ Error: "Database query failed." })
+                    });
+                }
+                if (rows.length === 1) {
+                    return resolve(true);
+                } else {
+                    return reject({
+                        statusCode: 400,
+                        body: JSON.stringify({ Error: "Incorrect manager password." })
+                    });
+                }
+            });
+        });
+    };
+
+let listVenuesAndShows = () => {
+    return new Promise((resolve, reject) => {
+        // Updated query to perform a JOIN operation and fetch venueName and showName
+        let query = `SELECT
+    Seats4u.Venue.venueName,
+    Seats4u.Show.showName,
+    Seats4u.Show.proceedings,
+    Seats4u.Show.active,
+    COALESCE(showSeatsRemainingCount.remainingSeats, 0) AS remainingSeats,
+    COALESCE(soldSeatsCount.soldSeats, 0) AS soldSeats
+FROM
+    Seats4u.Venue
+JOIN
+    Seats4u.Show ON Seats4u.Venue.venueName = Seats4u.Show.venueName
+LEFT JOIN
+    (SELECT
+         showName,
+         COUNT(*) AS remainingSeats
+     FROM
+         Seats4u.showSeatsRemaining
+     GROUP BY
+         showName) AS showSeatsRemainingCount ON Seats4u.Show.showName = showSeatsRemainingCount.showName
+LEFT JOIN
+    (SELECT
+         showName,
+         COUNT(*) AS soldSeats
+     FROM
+         Seats4u.soldSeats
+     GROUP BY
+         showName) AS soldSeatsCount ON Seats4u.Show.showName = soldSeatsCount.showName
+WHERE
+    Seats4u.Venue.venueName = ?
+GROUP BY
+    Seats4u.Venue.venueName,
+    Seats4u.Show.showName,
+    Seats4u.Show.proceedings;
+`;
+
+   pool.query(query, [event.venueName], (error, rows) => {
+            if (error) {
+                return reject({
+                    statusCode: 500,
+                    body: JSON.stringify({ Error: "Database query failed." })
+                });
+            }
+            return resolve(rows);  
+        });
+    });
+};
+
+try {
+    await validateManager();
+    if (!event.venueName) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ Error: "No venue name provided." })
+        };
+    }
+
+    // Updated function call to listVenuesAndShows
+    const venuesAndShows = await listVenuesAndShows(event.venueName);
+    
+    // Processing the data to group shows by venue
+    let result = venuesAndShows.reduce((acc, { venueName, showName, proceedings, active, remainingSeats, soldSeats }) => {
+    acc[venueName] = acc[venueName] || [];
+    acc[venueName].push({ showName, proceedings, active, remainingSeats, soldSeats });
+    return acc;
+    }, {});
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify(result)
+    };
+} catch (errorResponse) {
+    return {
+        statusCode: errorResponse.statusCode || 500,
+        body: errorResponse.body || JSON.stringify({ Error: "An error occurred." })
+    };
+}
+
+};
