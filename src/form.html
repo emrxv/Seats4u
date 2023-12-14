@@ -509,7 +509,6 @@
                 "price": price,
                 "managerPassword": showcreatepass,
             }
-            console.log(payload)
 
             fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/fillSeats", {
                 method: "POST",
@@ -554,7 +553,6 @@
             let rows = document.getElementById("createblockrows").value;
             let price = document.getElementById("createblockprice").value;
             let managerpass7 = document.getElementById("managerpass7").value;
-            console.log("Block Name:", blockname); // Add this line for debugging
 
             let blocks = [];
 
@@ -577,8 +575,6 @@
                 "blocks": blocks
             }
 
-            console.log(payload);
-
             fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/createBlock", {
                 method: "POST",
                 body: JSON.stringify(payload)
@@ -597,7 +593,6 @@
                     if (data.statusCode !== 200) {
                         // Parse the error message from the response body
                         let responseBody = JSON.parse(data.body);
-                        console.log(responseBody)
                         //let errorMessage = responseBody.Error;
 
                         // Display the error message
@@ -605,7 +600,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error(error);
                     document.getElementById("Error8").textContent = "Error: " + error.message; // Log the specific error message.
                 })
 
@@ -674,20 +668,48 @@
                 .then(data => {
                     if (data.statusCode === 200) {
                         document.getElementById("Error10").textContent = '';
-                        console.log('data.body' + data.body);
-                        // I was not able to get this working tonight (meaning it does not display what I want it to)
+
+                        let list = document.createElement('ul');
+                        list.style.listStyleType = 'none'; // Remove bullet points
+                        list.style.padding = '0'; // Remove default padding
+
+                        for (let x = 0; x < data.body.length; x++) {
+
+                            let listItem = document.createElement('p');
+                            listItem.textContent = "Block Name: " + data.body[x].blockName;
+                            listItem.style.marginBottom = '10px'; // Space between items
+
+                            let attr = document.createElement('p');
+                            attr.textContent = "Section: " + data.body[x].layoutSide;
+                            listItem.appendChild(attr);
+
+                            let attr_2 = document.createElement('p');
+                            attr_2.textContent = "Row(s): " + data.body[x].seatList;
+                            listItem.appendChild(attr_2);
+
+                            let attr_3 = document.createElement('p');
+                            attr_3.textContent = "Price: $" + parseFloat(data.body[x].Price);
+                            listItem.appendChild(attr_3);
+
+                            let line = document.createElement('p');
+                            line.textContent = "–––––––––––––––";
+                            listItem.appendChild(line);
+
+                            list.appendChild(listItem);
+                        }
+
+                        document.getElementById("Error10").appendChild(list);
                     } else {
                         let responseBody = JSON.parse(data.body);
-                        console.log(responseBody);
+                        
                         let errorMessage = responseBody.Error || "Unknown error";
-                        console.log(errorMessage);
+                        
                         document.getElementById("Error10").textContent = errorMessage;
                     }
                 })
                 .catch(error => {
                     document.getElementById("Error10").textContent = "Network error: " + error.message;
-                    console.log(error.message);
-                    console.log(error);
+                    
                 });
 
             document.getElementById("listblockshowname").value = '';
@@ -859,12 +881,12 @@
                     <div class="formRow">
                         <label class="label">Layout Section:</label>
 
-                        <select class = "input" name="Enter Layout Section" id="createblocklayoutsection">
+                        <select class="input" name="Enter Layout Section" id="createblocklayoutsection">
                             <option value="sideLeft">Side Left</option>
                             <option value="center">Center</option>
                             <option value="sideRight">Side Right</option>
                         </select>
-                            
+
                     </div>
                     <div class="formRow">
                         <label class="label">Price:</label>
