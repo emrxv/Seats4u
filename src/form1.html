@@ -280,69 +280,75 @@
 
 
         function SearchShows(e) {
-            let showSearch = document.getElementById("showSearch").value;
+    let showSearch = document.getElementById("showSearch").value;
 
-            let payload = {
-                "showName": showSearch,
-            };
+    let payload = {
+        "showName": showSearch,
+    };
 
-            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/searchShows", {
-                method: "POST",
-                body: JSON.stringify(payload)
-            })
-                .then(response => response.json()) // Parse the JSON from the response
-                .then(data => {
-                    if (data.statusCode === 200) {
-                        document.getElementById("SearchResults").textContent = '';
-                        let shows = data.constants; // Adjusted to match the provided JSON payload structure
+    fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/searchShows", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    })
+        .then(response => response.json()) // Parse the JSON from the response
+        .then(data => {
+            if (data.statusCode === 200) {
+                document.getElementById("SearchResults").textContent = '';
+                let responseBody = JSON.parse(data.body);
+                let shows = responseBody.constants;
+                let soldOut = responseBody.soldOut;
 
-                        shows.forEach(show => {
-                            let showDiv = document.createElement('div');
-                            showDiv.style.border = '1px solid #ddd'; // Style the div
-                            showDiv.style.padding = '10px';
-                            showDiv.style.marginBottom = '10px';
+                shows.forEach(show => {
+                    let showDiv = document.createElement('div');
+                    showDiv.style.border = '1px solid #ddd'; // Style the div
+                    showDiv.style.padding = '10px';
+                    showDiv.style.marginBottom = '10px';
 
-                            let title = document.createElement('h3');
-                            title.textContent = show.showName;
-                            showDiv.appendChild(title);
+                    let title = document.createElement('h3');
+                    title.textContent = show.showName + (soldOut ? " - SOLD OUT" : "");
+                    showDiv.appendChild(title);
 
-                            let venue = document.createElement('p');
-                            venue.textContent = "Venue: " + show.venueName;
-                            showDiv.appendChild(venue);
+                    let venue = document.createElement('p');
+                    venue.textContent = "Venue: " + show.venueName;
+                    showDiv.appendChild(venue);
 
-                            let location = document.createElement('p');
-                            location.textContent = "Location: " + show.Location;
-                            showDiv.appendChild(location);
+                    let location = document.createElement('p');
+                    location.textContent = "Location: " + show.Location;
+                    showDiv.appendChild(location);
 
-                            let date = document.createElement('p');
-                            date.textContent = "Date: " + show.date;
-                            showDiv.appendChild(date);
+                    let date = document.createElement('p');
+                    date.textContent = "Date: " + show.date;
+                    showDiv.appendChild(date);
 
-                            let time = document.createElement('p');
-                            time.textContent = "Time: " + show.time;
-                            showDiv.appendChild(time);
+                    let time = document.createElement('p');
+                    time.textContent = "Time: " + show.time;
+                    showDiv.appendChild(time);
 
-                            let price = document.createElement('p');
-                            price.textContent = "Price: $" + show.price.toFixed(2);
-                            showDiv.appendChild(price);
+                    let price = document.createElement('p');
+                    price.textContent = "Price: $" + show.price.toFixed(2);
+                    showDiv.appendChild(price);
 
-                            // Append the show div to the SearchResults element
-                            document.getElementById("SearchResults").appendChild(showDiv);
-                        });
+                    let remainingSeats = document.createElement('p');
+                    remainingSeats.textContent = "Remaining Seats: " + show.remainingSeats.toFixed();
+                    showDiv.appendChild(remainingSeats);
 
-                    } else {
-                        document.getElementById("SearchResults").innerHTML = '';
-                        let responseBody = JSON.parse(data.body);
-                        let errorMessage = responseBody.Error;
-                        document.getElementById("SearchResults").textContent = errorMessage;
-                    }
-                })
-                .catch(error => {
-                    document.getElementById("SearchResults").textContent = "Network error: " + error.message;
+                    // Append the show div to the SearchResults element
+                    document.getElementById("SearchResults").appendChild(showDiv);
                 });
 
-            document.getElementById("showSearch").value = '';
-        }
+            } else {
+                document.getElementById("SearchResults").textContent = '';
+                let errorMessage = data.Error;
+                document.getElementById("SearchResults").textContent = errorMessage;
+            }
+        })
+        .catch(error => {
+            document.getElementById("SearchResults").textContent = "Network error: " + error.message;
+        });
+
+    document.getElementById("showSearch").value = '';
+}
+
 
 
         function ListActiveShows(e) {
