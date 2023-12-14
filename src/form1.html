@@ -19,32 +19,32 @@
                 .then(data => {
                     if (data.statusCode === 200) {
                         document.getElementById("Error10").textContent = "";
-                    let availSeats = data.AvailableSeats;
-                    console.log(availSeats);
+                        let availSeats = data.AvailableSeats;
+                        console.log(availSeats);
                         // Parse the data and prepare it to be sent to the server for file update
 
-                    availSeats.forEach(availSeats => {
-                        let seatsDiv = document.createElement('div');
-                        seatsDiv.style.border = '1px solid #ddd'; // Style the div
-                        seatsDiv.style.padding = '10px';
-                        seatsDiv.style.marginBottom = '10px';
+                        availSeats.forEach(availSeats => {
+                            let seatsDiv = document.createElement('div');
+                            seatsDiv.style.border = '1px solid #ddd'; // Style the div
+                            seatsDiv.style.padding = '10px';
+                            seatsDiv.style.marginBottom = '10px';
 
-                        let row = document.createElement('p');
-                        row.textContent = "row: " + availSeats.row;
-                        seatsDiv.appendChild(row);
+                            let row = document.createElement('p');
+                            row.textContent = "row: " + availSeats.row;
+                            seatsDiv.appendChild(row);
 
-                        let column = document.createElement('p');
-                        column.textContent = "column: " + availSeats.column;
-                        seatsDiv.appendChild(column);
+                            let column = document.createElement('p');
+                            column.textContent = "column: " + availSeats.column;
+                            seatsDiv.appendChild(column);
 
-                        let layoutSide = document.createElement('p');
-                        layoutSide.textContent = "layout location: " + availSeats.layoutSide;
-                        seatsDiv.appendChild(layoutSide);
+                            let layoutSide = document.createElement('p');
+                            layoutSide.textContent = "layout location: " + availSeats.layoutSide;
+                            seatsDiv.appendChild(layoutSide);
 
-                        document.getElementById("Error10").appendChild(seatsDiv);
-                    });
-// these are the labels
-let venue_canvas = document.createElement('div');
+                            document.getElementById("Error10").appendChild(seatsDiv);
+                        });
+                        // these are the labels
+                        let venue_canvas = document.createElement('div');
                         venue_canvas.style.position = 'relative';
 
                         let label_l = document.createElement('label');
@@ -232,14 +232,14 @@ let venue_canvas = document.createElement('div');
                         seat.style.border = '1px solid blue';
                         seat.style.left = '115px';
                         seat.classList.add("seat");
-                        
+
                         venue_canvas_3.appendChild(seat);
 
                         let seat_2 = document.createElement('div');
                         seat_2.style.border = '1px solid red';
                         seat_2.style.right = '75px';
                         seat_2.classList.add("seat");
-                        
+
                         venue_canvas_3.appendChild(seat_2);
 
                         document.getElementById("seatsDisplay_3").appendChild(venue_canvas_3);
@@ -267,14 +267,14 @@ let venue_canvas = document.createElement('div');
                 });
 
             document.getElementById("seatsList").value = '';
-            
+
             document.getElementById("seatsDisplay").innerHTML = '';
             document.getElementById("seatsDisplay_2").innerHTML = '';
             document.getElementById("seatsDisplay_3").innerHTML = '';
             document.getElementById("seatsDisplay").style.display = "none";
             document.getElementById("seatsDisplay_2").style.display = "none";
             document.getElementById("seatsDisplay_3").style.display = "none";
-            
+
         }
 
 
@@ -394,50 +394,57 @@ let venue_canvas = document.createElement('div');
         }
 
         function PurchaseSeats(e) {
-            let showFrom = document.getElementById("puchaseSeatsShowName").value;
-            let seatsInfo = document.getElementById("seatsToPurchase").value;
-            let seats = [];
+    let showFrom = document.getElementById("puchaseSeatsShowName").value;
+    let seatsInfo = document.getElementById("seatsToPurchase").value;
+    let now = new Date();
+    let seats = [];
+    
 
-            for (let x = 0; x < seatsInfo.split(",").length; x = x + 3) {
-                let seat = {
-                    "showName": showFrom,
-                    "row" : seatsInfo.split(",")[x],
-                    "column" : seatsInfo.split(",")[x+1],
-                    "layoutSide" : seatsInfo.split(",")[x+2]
-                }
-                seats.push(seat);
-            }
-
-            let payload = {
-                "seats" : seats
-            };
-            console.log(payload);
-
-            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/purchaseSeats", {
-                method: "POST",
-                body: JSON.stringify(payload)
-            })
-                .then(response => response.json()) // Parse the JSON from the response
-                .then(data => {
-                    if (data.statusCode === 200) {
-                        document.getElementById("Error11").textContent = '';
-                        let shows = data.constants; // Adjusted to match the provided JSON payload structure
-                        let responseBody = JSON.parse(data.body);
-                        document.getElementById("Error11").textContent = responseBody;
-
-                    } else {
-                        document.getElementById("Error11").innerHTML = '';
-                        let responseBody = JSON.parse(data.body);
-                        let errorMessage = responseBody.Error;
-                        document.getElementById("Error11").textContent = errorMessage;
-                    }
-                })
-                .catch(error => {
-                    document.getElementById("Error11").textContent = "Network error: " + error.message;
-                });
-
-            document.getElementById("puchaseSeatsShowName").value = '';
+    for (let x = 0; x < seatsInfo.split(",").length; x = x + 3) {
+        let seat = {
+            "showName": showFrom,
+            "row": seatsInfo.split(",")[x],
+            "column": seatsInfo.split(",")[x + 1],
+            "layoutSide": seatsInfo.split(",")[x + 2],
+            "now" : now
         }
+        seats.push(seat);
+    }
+
+    let payload = {
+        "seats": seats
+    };
+    console.log(JSON.stringify(payload));
+
+    fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/purchaseSeats", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json()) // Parse the JSON from the response
+    .then(data => {
+        if (data.statusCode === 200) {
+            document.getElementById("Error11").textContent = '';
+            let shows = data.constants;
+            let responseBody = JSON.parse(data.body);
+            document.getElementById("Error11").textContent = responseBody;
+        } else {
+            document.getElementById("Error11").textContent = '';
+            // Handling the specific error structure
+            if (data.Error && data.Error.body) {
+                let errorBody = JSON.parse(data.Error.body);
+
+                    document.getElementById("Error11").textContent = errorBody.Error;
+
+            } 
+        }
+    })
+    .catch(error => {
+        document.getElementById("Error11").textContent = "Network error: " + error.message;
+    });
+
+    document.getElementById("puchaseSeatsShowName").value = '';
+}
+
 
 
     </script>
@@ -472,7 +479,7 @@ let venue_canvas = document.createElement('div');
             <!-- Click Section -->
             <div class="formColumn">
                 <div class="formRow">
-                    <label id = "label1">Not a customer?</label>
+                    <label id="label1">Not a customer?</label>
                     <a href="https://seats4you.s3.amazonaws.com/form.html">
                         <button class="clickButton1">Click Here</button>
                     </a>
@@ -481,7 +488,8 @@ let venue_canvas = document.createElement('div');
                     <div class="formRow">
                         <label class="label">Purchase Seats:</label>
                         <input placeholder="Enter show name" id="puchaseSeatsShowName" class="input" />
-                        <input placeholder="Enter row, column, and layout location of each" id="seatsToPurchase" class="input" />
+                        <input placeholder="Enter row, column, and layout location of each" id="seatsToPurchase"
+                            class="input" />
                     </div>
                     <button class="listActiveShowsButton" onClick=PurchaseSeats(event)>Purchase Seats</button>
                     <div id="Error11"></div>
