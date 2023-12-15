@@ -271,6 +271,11 @@
                 "managerPassword": managerpass3,
             };
 
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/deleteSeats", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+
             fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/deleteShow", {
                 method: "POST",
                 body: JSON.stringify(payload)
@@ -305,6 +310,11 @@
                 "showName": deleteshowaname,
                 "adminPassword": adminpass2,
             };
+
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/deleteSeats", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
 
             fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/deleteShowA", {
                 method: "POST",
@@ -652,69 +662,70 @@
         }
 
         function ListBlocks(e) {
-            let showname = document.getElementById("listblockshowname").value;
-            let managerpass9 = document.getElementById("managerpass9").value;
+    let showname = document.getElementById("listblockshowname").value;
+    let managerpass9 = document.getElementById("managerpass9").value;
 
-            payload = {
-                "showName": showname,
-                "managerPassword": managerpass9
+    payload = {
+        "showName": showname,
+        "managerPassword": managerpass9
+    }
+
+    fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/listBlocks", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.statusCode === 200) {
+                document.getElementById("Error10").textContent = '';
+
+                let list = document.createElement('ul');
+
+                for (let x = 0; x < data.body.length; x++) {
+
+                    list.style.listStyleType = 'none'; // Remove bullet points
+                    list.style.padding = '0'; // Remove default padding
+
+                    let listItem = document.createElement('li'); // Changed from 'p' to 'li'
+                    listItem.style.border = '1px solid #ddd'; // Add border to each item
+                    listItem.style.marginBottom = '10px'; // Space between items
+
+                    let blockName = document.createElement('p');
+                    blockName.textContent = "Block Name: " + data.body[x].blockName;
+
+                    let attr = document.createElement('p');
+                    attr.textContent = "Section: " + data.body[x].layoutSide;
+                    blockName.appendChild(attr);
+
+                    let attr_2 = document.createElement('p');
+                    attr_2.textContent = "Row(s): " + data.body[x].seatList;
+                    blockName.appendChild(attr_2);
+
+                    let attr_3 = document.createElement('p');
+                    attr_3.textContent = "Price: $" + parseFloat(data.body[x].Price);
+                    blockName.appendChild(attr_3);
+
+                    listItem.appendChild(blockName);
+                    list.appendChild(listItem);
+                }
+
+                document.getElementById("Error10").appendChild(list);
+            } else {
+                let responseBody = JSON.parse(data.body);
+
+                let errorMessage = responseBody.Error || "Unknown error";
+
+                document.getElementById("Error10").textContent = errorMessage;
             }
+        })
+        .catch(error => {
+            document.getElementById("Error10").textContent = "Network error: " + error.message;
 
-            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/listBlocks", {
-                method: "POST",
-                body: JSON.stringify(payload)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.statusCode === 200) {
-                        document.getElementById("Error10").textContent = '';
+        });
 
-                        let list = document.createElement('ul');
-                        list.style.listStyleType = 'none'; // Remove bullet points
-                        list.style.padding = '0'; // Remove default padding
-
-                        for (let x = 0; x < data.body.length; x++) {
-
-                            let listItem = document.createElement('p');
-                            listItem.textContent = "Block Name: " + data.body[x].blockName;
-                            listItem.style.marginBottom = '10px'; // Space between items
-
-                            let attr = document.createElement('p');
-                            attr.textContent = "Section: " + data.body[x].layoutSide;
-                            listItem.appendChild(attr);
-
-                            let attr_2 = document.createElement('p');
-                            attr_2.textContent = "Row(s): " + data.body[x].seatList;
-                            listItem.appendChild(attr_2);
-
-                            let attr_3 = document.createElement('p');
-                            attr_3.textContent = "Price: $" + parseFloat(data.body[x].Price);
-                            listItem.appendChild(attr_3);
-
-                            let line = document.createElement('p');
-                            line.textContent = "–––––––––––––––";
-                            listItem.appendChild(line);
-
-                            list.appendChild(listItem);
-                        }
-
-                        document.getElementById("Error10").appendChild(list);
-                    } else {
-                        let responseBody = JSON.parse(data.body);
-                        
-                        let errorMessage = responseBody.Error || "Unknown error";
-                        
-                        document.getElementById("Error10").textContent = errorMessage;
-                    }
-                })
-                .catch(error => {
-                    document.getElementById("Error10").textContent = "Network error: " + error.message;
-                    
-                });
-
-            document.getElementById("listblockshowname").value = '';
-            document.getElementById("managerpass9").value = '';
-        }
+    document.getElementById("listblockshowname").value = '';
+    document.getElementById("managerpass9").value = '';
+}
 
     </script>
 
