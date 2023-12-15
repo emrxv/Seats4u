@@ -4,12 +4,83 @@
 <body>
     <script type="text/javascript">
 
+        function parseString(input) {
+            // Remove whitespace and commas from the string
+            const cleanedString = input.replace(/[\s,]/g, '');
+
+            // Extract the first alphabetical letter and the length of the cleaned string
+            const firstLetter = cleanedString.charAt(0);
+            const length = cleanedString.length;
+
+            return { firstLetter, length };
+        }
+
+        function hexToRGBA(hex, alpha) {
+            const r = parseInt(hex.substring(1, 3), 16);
+            const g = parseInt(hex.substring(3, 5), 16);
+            const b = parseInt(hex.substring(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
         function ListAvailableSeats(e) {
             let seatsList = document.getElementById("seatsList").value;
+
+            let colorsList = ['#16A085', '#A569BD', '#F4D03F', '#E74C3C', '#5DADE2', '#F5B041', '#5B2C6F'];
+            let blocks = [];
 
             let payload = {
                 "showName": seatsList,
             };
+
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/listBlocksPlus", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.statusCode === 200) {
+
+                        blocks = data.body;
+                        let venue_canvas = document.createElement('div');
+                        venue_canvas.style.position = 'relative';
+                        venue_canvas.style.height = ((blocks.length + 1) * 25) + 'px';
+
+                        let showtitle = document.createElement('h2');
+                        showtitle.textContent = blocks[0].showName;
+                        showtitle.style.color = "black";
+                        showtitle.style.top = '0%';
+                        showtitle.style.position = 'relative';
+                        showtitle.style.left = '50%';
+                        showtitle.style.transform = 'translateX(-50%)';
+                        showtitle.style.textAlign = "center";
+                        venue_canvas.appendChild(showtitle);
+                        document.getElementById("seatsDisplay_4").appendChild(venue_canvas);
+
+                        for (let x = 0; x < blocks.length; x++) {
+                            console.log(blocks[x])
+                            let label_block = document.createElement('label');
+                            label_block.textContent = blocks[x].blockName + "   $" + blocks[x].Price;
+                            label_block.style.color = colorsList[x];
+                            label_block.style.top = ((x + 2) * 20) + 'px';
+                            label_block.style.position = 'absolute';
+                            label_block.style.left = '50%';
+                            label_block.style.transform = 'translateX(-50%)';
+                            label_block.style.textAlign = "center";
+                            venue_canvas.appendChild(label_block);
+
+                        }
+                        document.getElementById("seatsDisplay_4").appendChild(venue_canvas);
+                        document.getElementById("seatsDisplay_4").style.display = "block";
+                        document.getElementById("borderID_4").style.display = "block";
+                        document.getElementById("formRowID_4").style.display = "block";
+                        //}
+                    } else {
+                        document.getElementById("Error12").textContent = "";
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("Error12").textContent = "Network error: " + error.message;
+                });
 
             fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/showAvailableSeats", {
                 method: "POST",
@@ -18,10 +89,64 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.statusCode === 200) {
+                        console.log(data.Price[0])
+
+                        if (blocks.length === 0 || !blocks) {
+                            let venue_canvas_5 = document.createElement('div');
+                            venue_canvas_5.style.position = 'relative';
+                            venue_canvas_5.style.height = '50px';
+
+                            let showtitle = document.createElement('h2');
+                            showtitle.textContent = data.Price[0].showName + ":  $" + data.Price[0].price;
+                            showtitle.style.color = "black";
+                            showtitle.style.top = '20px';
+                            showtitle.style.position = 'absolute';
+                            showtitle.style.left = '50%';
+                            showtitle.style.transform = 'translateX(-50%)';
+                            showtitle.style.textAlign = "center";
+                            venue_canvas_5.appendChild(showtitle);
+
+                            document.getElementById("seatsDisplay_4").appendChild(venue_canvas_5);
+                            document.getElementById("seatsDisplay_4").style.display = "block";
+                            document.getElementById("borderID_4").style.display = "block";
+                            document.getElementById("formRowID_4").style.display = "block";
+                        }
+
                         document.getElementById("Error10").textContent = "";
                         let availSeats = data.AvailableSeats;
-                        console.log(availSeats);
+                        let availSeats_2 = new Array(availSeats.length);
                         // Parse the data and prepare it to be sent to the server for file update
+
+                        if (blocks.length === 0 || !blocks) {
+                            for (let seat of availSeats) {
+                                seat.Price = data.Price[0].price;
+                            }
+                        } else {
+                            for (let seat of availSeats) {
+                                for (let x = 0; x < blocks.length; x++) {
+                                    // Split seatList into an array of seat rows
+                                    let seatListArray = blocks[x].seatList.split(',').map(row => row.trim());
+
+                                    if ( seat.layoutSide === blocks[x].layoutSide && seatListArray.includes(seat.row)) {
+                                        seat.Price = blocks[x].Price;
+                                    }
+                                }
+                            }
+                        }
+
+                        sortBy = document.getElementById("sortCriteria").value
+                        if (sortBy === "Row") {
+                            availSeats.sort((a, b) => a.row.localeCompare(b.row));
+                            console.log(availSeats);
+                        }
+                        if (sortBy === "Section") {
+                            availSeats.sort((a, b) => a.layoutSide.localeCompare(b.layoutSide));
+                            console.log(availSeats);
+                        }
+                        if (sortBy === "Price") {
+                            availSeats.sort((a, b) => b.Price - a.Price);
+                            console.log(availSeats);
+                        }
 
                         availSeats.forEach(availSeats => {
                             let seatsDiv = document.createElement('div');
@@ -41,8 +166,13 @@
                             layoutSide.textContent = "layout location: " + availSeats.layoutSide;
                             seatsDiv.appendChild(layoutSide);
 
+                            let price = document.createElement('p');
+                            price.textContent = "Price:  $" + availSeats.Price;
+                            seatsDiv.appendChild(price);
+
                             document.getElementById("Error10").appendChild(seatsDiv);
                         });
+
                         // these are the labels
                         let venue_canvas = document.createElement('div');
                         venue_canvas.style.position = 'relative';
@@ -85,7 +215,6 @@
                         let nr, nc;
                         for (let l = 0; l < 3; l++) {
                             if (l === 0) { // sideLeft
-                                console.log(venueSeats[0].endRowColL);
                                 match = venueSeats[0].endRowColL.match(/^([A-Z]+)(\d+)$/);
 
                                 if (match) {
@@ -95,7 +224,6 @@
                                 ncL = nc;
                                 nrT = nr;
                             } else if (l === 1) { // center
-                                console.log(venueSeats[0].endRowColC);
                                 match = venueSeats[0].endRowColC.match(/^([A-Z]+)(\d+)$/);
 
                                 if (match) {
@@ -105,7 +233,6 @@
                                 ncC = nc;
                                 nrT = Math.max(nr, nrT);
                             } else if (l === 2) { // right
-                                console.log(venueSeats[0].endRowColR);
                                 match = venueSeats[0].endRowColR.match(/^([A-Z]+)(\d+)$/);
 
                                 if (match) {
@@ -116,7 +243,7 @@
                                 nrT = Math.max(nr, nrT);
                             }
                         }
-                        let seatScale = (32 / ncL + ncC + ncR + 2);
+                        let seatScale = (50 / ncL + ncC + ncR + 2);
                         for (let l = 0; l < 3; l++) {
                             if (l === 0) {
                                 match = venueSeats[0].endRowColL.match(/^([A-Z]+)(\d+)$/);
@@ -145,22 +272,22 @@
                                     let top, left;
 
                                     if (l === 0) {
-                                        top = (seatScale + 5) * r - (seatScale + 5) + 'px';
-                                        left = seatScale * parseInt(c) - (seatScale + 5) + 'px';
+                                        top = (seatScale + 5) * r - (seatScale + 5);
+                                        left = seatScale * parseInt(c) - (seatScale + 5);
                                     } else if (l === 1) {
-                                        top = (seatScale + 5) * r - (seatScale + 5) + 'px';
-                                        left = seatScale * (parseInt(c) + ncL + 1) - (seatScale + 5) + 'px';
+                                        top = (seatScale + 5) * r - (seatScale + 5);
+                                        left = seatScale * (parseInt(c) + ncL + 1) - (seatScale + 5);
                                     } else if (l === 2) {
-                                        top = (seatScale + 5) * r - (seatScale + 5) + 'px';
-                                        left = seatScale * (parseInt(c) + ncL + ncC + 2) - (seatScale + 5) + 'px';
+                                        top = (seatScale + 5) * r - (seatScale + 5);
+                                        left = seatScale * (parseInt(c) + ncL + ncC + 2) - (seatScale + 5);
                                     }
                                     let seat = document.createElement('div');
                                     seat.classList.add("seat");
                                     seat.style.border = '1px solid red';
-                                    seat.style.top = top;
-                                    seat.style.left = left;
-                                    seat.style.height = seatScale - 5 + 'px';
-                                    seat.style.width = seatScale - 5 + 'px';
+                                    seat.style.top = top + 'px';
+                                    seat.style.left = left + 'px';
+                                    seat.style.height = (seatScale - 5) + 'px';
+                                    seat.style.width = (seatScale - 5) + 'px';
 
                                     let label = document.createElement('p');
                                     label.textContent = String.fromCharCode(r + 64) + c;
@@ -171,8 +298,45 @@
                                 }
                             }
                         }
+
+                        for (let r = 0; r < blocks.length; r++) {
+                            let top1, left1;
+                            if (blocks[r].seatList) {
+                                let result = parseString(blocks[r].seatList);
+                                let start = parseInt(result.firstLetter.charCodeAt(0) - 64) - 1;
+                                let len = result.length;
+
+                                let block = document.createElement('div');
+                                block.classList.add("block");
+                                block.style.border = '1px solid' + colorsList[r];
+                                block.style.backgroundColor = hexToRGBA(colorsList[r], 0.25);
+
+                                if (blocks[r].layoutSide === 'sideLeft') {
+                                    top1 = (seatScale + 5) * start - 4;
+                                    left1 = -7;
+                                    block.style.width = (seatScale) * ncL + 'px';
+                                } else if (blocks[r].layoutSide === 'center') {
+                                    top1 = (seatScale + 5) * start - 4;
+                                    left1 = seatScale * (ncL + 1) - 7;
+                                    block.style.width = (seatScale) * ncC + 'px';
+                                } else if (blocks[r].layoutSide === 'sideRight') {
+                                    top1 = (seatScale + 5) * start - 4;
+                                    left1 = seatScale * (ncL + ncC + 2) - 7;
+                                    block.style.width = (seatScale) * ncR + 'px';
+                                }
+
+                                block.style.top = Math.round(top1) + 'px';
+                                block.style.left = Math.round(left1) + 'px';
+                                block.style.height = ((seatScale + 3) * len) + 'px';
+
+                                venue_canvas_2.appendChild(block);
+
+                            } else {
+                                console.log('SeatList is missing for block', blocks[r].blockName);
+                            }
+                        }
                         //document.getElementById("seatsDisplay_2").style.width = 25*nrT + 'px';
-                        document.getElementById("seatsDisplay_2").style.height = seatScale * nrT + 10 + 'px';
+                        document.getElementById("seatsDisplay_2").style.height = (seatScale * nrT + 10) + 'px';
                         document.getElementById("seatsDisplay_2").appendChild(venue_canvas_2);
                         document.getElementById("seatsDisplay_2").style.display = "block";
                         document.getElementById("borderID_2").style.display = "block";
@@ -185,22 +349,22 @@
                             let top, left;
 
                             if (availSeat.layoutSide === 'sideLeft') {
-                                top = (seatScale + 5) * (availSeat.row.charCodeAt(0) - 64) - (seatScale + 5) + 'px';
-                                left = seatScale * parseInt(availSeat.column) - (seatScale + 5) + 'px';
+                                top = (seatScale + 5) * (availSeat.row.charCodeAt(0) - 64) - (seatScale + 5);
+                                left = seatScale * parseInt(availSeat.column) - (seatScale + 5);
                             } else if (availSeat.layoutSide === 'center') {
-                                top = (seatScale + 5) * (availSeat.row.charCodeAt(0) - 64) - (seatScale + 5) + 'px';
-                                left = seatScale * (parseInt(availSeat.column) + ncL + 1) - (seatScale + 5) + 'px';
+                                top = (seatScale + 5) * (availSeat.row.charCodeAt(0) - 64) - (seatScale + 5);
+                                left = seatScale * (parseInt(availSeat.column) + ncL + 1) - (seatScale + 5);
                             } else if (availSeat.layoutSide === 'sideRight') {
-                                top = (seatScale + 5) * (availSeat.row.charCodeAt(0) - 64) - (seatScale + 5) + 'px';
-                                left = seatScale * (parseInt(availSeat.column) + ncL + ncC + 2) - (seatScale + 5) + 'px';
+                                top = (seatScale + 5) * (availSeat.row.charCodeAt(0) - 64) - (seatScale + 5);
+                                left = seatScale * (parseInt(availSeat.column) + ncL + ncC + 2) - (seatScale + 5);
                             }
                             let seat = document.createElement('div');
                             seat.style.border = '1px solid blue';
                             seat.classList.add("seat");
-                            seat.style.top = top;
-                            seat.style.left = left;
-                            seat.style.height = seatScale - 5 + 'px';
-                            seat.style.width = seatScale - 5 + 'px';
+                            seat.style.top = top + 'px';
+                            seat.style.left = left + 'px';
+                            seat.style.height = (seatScale - 5) + 'px';
+                            seat.style.width = (seatScale - 5) + 'px';
 
                             venue_canvas_2.appendChild(seat);
                         }
@@ -260,6 +424,8 @@
                         document.getElementById("formRowID_2").style.display = "none";
                         document.getElementById("borderID_3").style.display = "none";
                         document.getElementById("formRowID_3").style.display = "none";
+                        document.getElementById("borderID_4").style.display = "none";
+                        document.getElementById("formRowID_4").style.display = "none";
                     }
                 })
                 .catch(error => {
@@ -271,83 +437,87 @@
             document.getElementById("seatsDisplay").innerHTML = '';
             document.getElementById("seatsDisplay_2").innerHTML = '';
             document.getElementById("seatsDisplay_3").innerHTML = '';
+            document.getElementById("seatsDisplay_4").innerHTML = '';
+            //document.getElementById("Error12").innerHTML = '';
             document.getElementById("seatsDisplay").style.display = "none";
             document.getElementById("seatsDisplay_2").style.display = "none";
             document.getElementById("seatsDisplay_3").style.display = "none";
+            document.getElementById("seatsDisplay_4").style.display = "none";
+            //document.getElementById("Error12").style.display = "none";
 
         }
 
 
 
         function SearchShows(e) {
-    let showSearch = document.getElementById("showSearch").value;
+            let showSearch = document.getElementById("showSearch").value;
 
-    let payload = {
-        "showName": showSearch,
-    };
+            let payload = {
+                "showName": showSearch,
+            };
 
-    fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/searchShows", {
-        method: "POST",
-        body: JSON.stringify(payload)
-    })
-        .then(response => response.json()) // Parse the JSON from the response
-        .then(data => {
-            if (data.statusCode === 200) {
-                document.getElementById("SearchResults").textContent = '';
-                let responseBody = JSON.parse(data.body);
-                let shows = responseBody.constants;
-                let soldOut = responseBody.soldOut;
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/searchShows", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json()) // Parse the JSON from the response
+                .then(data => {
+                    if (data.statusCode === 200) {
+                        document.getElementById("SearchResults").textContent = '';
+                        let responseBody = JSON.parse(data.body);
+                        let shows = responseBody.constants;
+                        let soldOut = responseBody.soldOut;
 
-                shows.forEach(show => {
-                    let showDiv = document.createElement('div');
-                    showDiv.style.border = '1px solid #ddd'; // Style the div
-                    showDiv.style.padding = '10px';
-                    showDiv.style.marginBottom = '10px';
+                        shows.forEach(show => {
+                            let showDiv = document.createElement('div');
+                            showDiv.style.border = '1px solid #ddd'; // Style the div
+                            showDiv.style.padding = '10px';
+                            showDiv.style.marginBottom = '10px';
 
-                    let title = document.createElement('h3');
-                    title.textContent = show.showName + (soldOut ? " - SOLD OUT" : "");
-                    showDiv.appendChild(title);
+                            let title = document.createElement('h3');
+                            title.textContent = show.showName + (soldOut ? " - SOLD OUT" : "");
+                            showDiv.appendChild(title);
 
-                    let venue = document.createElement('p');
-                    venue.textContent = "Venue: " + show.venueName;
-                    showDiv.appendChild(venue);
+                            let venue = document.createElement('p');
+                            venue.textContent = "Venue: " + show.venueName;
+                            showDiv.appendChild(venue);
 
-                    let location = document.createElement('p');
-                    location.textContent = "Location: " + show.Location;
-                    showDiv.appendChild(location);
+                            let location = document.createElement('p');
+                            location.textContent = "Location: " + show.Location;
+                            showDiv.appendChild(location);
 
-                    let date = document.createElement('p');
-                    date.textContent = "Date: " + show.date;
-                    showDiv.appendChild(date);
+                            let date = document.createElement('p');
+                            date.textContent = "Date: " + show.date;
+                            showDiv.appendChild(date);
 
-                    let time = document.createElement('p');
-                    time.textContent = "Time: " + show.time;
-                    showDiv.appendChild(time);
+                            let time = document.createElement('p');
+                            time.textContent = "Time: " + show.time;
+                            showDiv.appendChild(time);
 
-                    let price = document.createElement('p');
-                    price.textContent = "Price: $" + show.price.toFixed(2);
-                    showDiv.appendChild(price);
+                            let price = document.createElement('p');
+                            price.textContent = "Price: $" + show.price.toFixed(2);
+                            showDiv.appendChild(price);
 
-                    let remainingSeats = document.createElement('p');
-                    remainingSeats.textContent = "Remaining Seats: " + show.remainingSeats.toFixed();
-                    showDiv.appendChild(remainingSeats);
+                            let remainingSeats = document.createElement('p');
+                            remainingSeats.textContent = "Remaining Seats: " + show.remainingSeats.toFixed();
+                            showDiv.appendChild(remainingSeats);
 
-                    // Append the show div to the SearchResults element
-                    document.getElementById("SearchResults").appendChild(showDiv);
+                            // Append the show div to the SearchResults element
+                            document.getElementById("SearchResults").appendChild(showDiv);
+                        });
+
+                    } else {
+                        document.getElementById("SearchResults").textContent = '';
+                        let errorMessage = data.Error;
+                        document.getElementById("SearchResults").textContent = errorMessage;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("SearchResults").textContent = "Network error: " + error.message;
                 });
 
-            } else {
-                document.getElementById("SearchResults").textContent = '';
-                let errorMessage = data.Error;
-                document.getElementById("SearchResults").textContent = errorMessage;
-            }
-        })
-        .catch(error => {
-            document.getElementById("SearchResults").textContent = "Network error: " + error.message;
-        });
-
-    document.getElementById("showSearch").value = '';
-}
+            document.getElementById("showSearch").value = '';
+        }
 
 
 
@@ -400,56 +570,56 @@
         }
 
         function PurchaseSeats(e) {
-    let showFrom = document.getElementById("puchaseSeatsShowName").value;
-    let seatsInfo = document.getElementById("seatsToPurchase").value;
-    let now = new Date();
-    let seats = [];
-    
+            let showFrom = document.getElementById("puchaseSeatsShowName").value;
+            let seatsInfo = document.getElementById("seatsToPurchase").value;
+            let now = new Date();
+            let seats = [];
 
-    for (let x = 0; x < seatsInfo.split(",").length; x = x + 3) {
-        let seat = {
-            "showName": showFrom,
-            "row": seatsInfo.split(",")[x],
-            "column": seatsInfo.split(",")[x + 1],
-            "layoutSide": seatsInfo.split(",")[x + 2],
-            "now" : now
+
+            for (let x = 0; x < seatsInfo.split(",").length; x = x + 3) {
+                let seat = {
+                    "showName": showFrom,
+                    "row": seatsInfo.split(",")[x],
+                    "column": seatsInfo.split(",")[x + 1],
+                    "layoutSide": seatsInfo.split(",")[x + 2],
+                    "now": now
+                }
+                seats.push(seat);
+            }
+
+            let payload = {
+                "seats": seats
+            };
+            console.log(JSON.stringify(payload));
+
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/purchaseSeats", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json()) // Parse the JSON from the response
+                .then(data => {
+                    if (data.statusCode === 200) {
+                        document.getElementById("Error11").textContent = '';
+                        let shows = data.constants;
+                        let responseBody = JSON.parse(data.body);
+                        document.getElementById("Error11").textContent = responseBody;
+                    } else {
+                        document.getElementById("Error11").textContent = '';
+                        // Handling the specific error structure
+                        if (data.Error && data.Error.body) {
+                            let errorBody = JSON.parse(data.Error.body);
+
+                            document.getElementById("Error11").textContent = errorBody.Error;
+
+                        }
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("Error11").textContent = "Network error: " + error.message;
+                });
+
+            document.getElementById("puchaseSeatsShowName").value = '';
         }
-        seats.push(seat);
-    }
-
-    let payload = {
-        "seats": seats
-    };
-    console.log(JSON.stringify(payload));
-
-    fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/purchaseSeats", {
-        method: "POST",
-        body: JSON.stringify(payload)
-    })
-    .then(response => response.json()) // Parse the JSON from the response
-    .then(data => {
-        if (data.statusCode === 200) {
-            document.getElementById("Error11").textContent = '';
-            let shows = data.constants;
-            let responseBody = JSON.parse(data.body);
-            document.getElementById("Error11").textContent = responseBody;
-        } else {
-            document.getElementById("Error11").textContent = '';
-            // Handling the specific error structure
-            if (data.Error && data.Error.body) {
-                let errorBody = JSON.parse(data.Error.body);
-
-                    document.getElementById("Error11").textContent = errorBody.Error;
-
-            } 
-        }
-    })
-    .catch(error => {
-        document.getElementById("Error11").textContent = "Network error: " + error.message;
-    });
-
-    document.getElementById("puchaseSeatsShowName").value = '';
-}
 
 
 
@@ -500,6 +670,11 @@
                     <button class="listActiveShowsButton" onClick=PurchaseSeats(event)>Purchase Seats</button>
                     <div id="Error11"></div>
                 </div>
+                <div id="borderID_4" class="border_2">
+                    <div id="formRowID_4" class="formRow_2">
+                        <div id="seatsDisplay_4" class="display"></div>
+                    </div>
+                </div>
                 <div id="borderID_1" class="border_2">
                     <div id="formRowID_1" class="formRow_2">
                         <div id="seatsDisplay" class="display"></div>
@@ -520,6 +695,12 @@
                         <label class="label">List Available Seats:</label>
                         <input placeholder="Enter show name" id="seatsList" class="input" />
                     </div>
+                    <select class="input" name="Sort By" id="sortCriteria">
+                        <option value="Row">Row</option>
+                        <option value="Section">Section</option>
+                        <option value="Price">Price</option>
+                    </select>
+                    <div id="Error12"></div>
                     <button class="button" onClick=ListAvailableSeats(event)>List Available Seats</button>
                     <div id="availableSeatsResults"></div>
                     <div id="Error10"></div>

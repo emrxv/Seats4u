@@ -171,6 +171,12 @@ button:hover {
   height: 15px;
 }
 
+.block {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+}
+
 .label2 {
   font-size: 10px;
   position: absolute;
