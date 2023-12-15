@@ -3,6 +3,24 @@
 <body>
     <script type="text/javascript">
 
+        function parseString(input) {
+            // Remove whitespace and commas from the string
+            const cleanedString = input.replace(/[\s,]/g, '');
+
+            // Extract the first alphabetical letter and the length of the cleaned string
+            const firstLetter = cleanedString.charAt(0);
+            const length = cleanedString.length;
+
+            return { firstLetter, length };
+        }
+
+        function hexToRGBA(hex, alpha) {
+            const r = parseInt(hex.substring(1, 3), 16);
+            const g = parseInt(hex.substring(3, 5), 16);
+            const b = parseInt(hex.substring(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
         function GenerateShowsReport(e) {
             let GenerateShowsName = document.getElementById("GenerateShowsName").value;
             let adminpass3 = document.getElementById("adminpass3").value;
@@ -598,7 +616,7 @@
                 .then(data => {
                     // Check if the response indicates success
                     if (data.statusCode === 200) {
-                        document.getElementById("Error8").textContent = "Block created successfully!";
+                        document.getElementById("Error13").textContent = "Block created successfully!";
                     }
                     if (data.statusCode !== 200) {
                         // Parse the error message from the response body
@@ -606,11 +624,11 @@
                         //let errorMessage = responseBody.Error;
 
                         // Display the error message
-                        document.getElementById("Error8").textContent = responseBody.body;
+                        document.getElementById("Error13").textContent = responseBody.body;
                     }
                 })
                 .catch(error => {
-                    document.getElementById("Error8").textContent = "Error: " + error.message; // Log the specific error message.
+                    document.getElementById("Error13").textContent = "Error: " + error.message; // Log the specific error message.
                 })
 
             // Clear the input fields after the operation
@@ -662,70 +680,442 @@
         }
 
         function ListBlocks(e) {
-    let showname = document.getElementById("listblockshowname").value;
-    let managerpass9 = document.getElementById("managerpass9").value;
+            let showname = document.getElementById("listblockshowname").value;
+            let managerpass9 = document.getElementById("managerpass9").value;
 
-    payload = {
-        "showName": showname,
-        "managerPassword": managerpass9
-    }
-
-    fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/listBlocks", {
-        method: "POST",
-        body: JSON.stringify(payload)
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.statusCode === 200) {
-                document.getElementById("Error10").textContent = '';
-
-                let list = document.createElement('ul');
-
-                for (let x = 0; x < data.body.length; x++) {
-
-                    list.style.listStyleType = 'none'; // Remove bullet points
-                    list.style.padding = '0'; // Remove default padding
-
-                    let listItem = document.createElement('li'); // Changed from 'p' to 'li'
-                    listItem.style.border = '1px solid #ddd'; // Add border to each item
-                    listItem.style.marginBottom = '10px'; // Space between items
-
-                    let blockName = document.createElement('p');
-                    blockName.textContent = "Block Name: " + data.body[x].blockName;
-
-                    let attr = document.createElement('p');
-                    attr.textContent = "Section: " + data.body[x].layoutSide;
-                    blockName.appendChild(attr);
-
-                    let attr_2 = document.createElement('p');
-                    attr_2.textContent = "Row(s): " + data.body[x].seatList;
-                    blockName.appendChild(attr_2);
-
-                    let attr_3 = document.createElement('p');
-                    attr_3.textContent = "Price: $" + parseFloat(data.body[x].Price);
-                    blockName.appendChild(attr_3);
-
-                    listItem.appendChild(blockName);
-                    list.appendChild(listItem);
-                }
-
-                document.getElementById("Error10").appendChild(list);
-            } else {
-                let responseBody = JSON.parse(data.body);
-
-                let errorMessage = responseBody.Error || "Unknown error";
-
-                document.getElementById("Error10").textContent = errorMessage;
+            payload = {
+                "showName": showname,
+                "managerPassword": managerpass9
             }
-        })
-        .catch(error => {
-            document.getElementById("Error10").textContent = "Network error: " + error.message;
 
-        });
+            let colorsList = ['#16A085', '#A569BD', '#FF4BDB', '#3AE215', '#F4D03F', '#E74C3C', '#5DADE2', '#F5B041', '#5B2C6F'];
+            let blocks = [];
 
-    document.getElementById("listblockshowname").value = '';
-    document.getElementById("managerpass9").value = '';
-}
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/listBlocksPlus", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.statusCode === 200) {
+
+                        blocks = data.body;
+                        let venue_canvas = document.createElement('div');
+                        venue_canvas.style.position = 'relative';
+                        venue_canvas.style.height = ((blocks.length + 1) * 25) + 'px';
+
+                        let showtitle = document.createElement('h2');
+                        showtitle.textContent = blocks[0].showName;
+                        showtitle.style.color = "black";
+                        showtitle.style.top = '0%';
+                        showtitle.style.position = 'relative';
+                        showtitle.style.left = '50%';
+                        showtitle.style.transform = 'translateX(-50%)';
+                        showtitle.style.textAlign = "center";
+                        venue_canvas.appendChild(showtitle);
+                        document.getElementById("seatsDisplay_4").appendChild(venue_canvas);
+
+                        for (let x = 0; x < blocks.length; x++) {
+                            console.log(blocks[x])
+                            let label_block = document.createElement('label');
+                            label_block.textContent = blocks[x].blockName + "   $" + blocks[x].Price;
+                            label_block.style.color = colorsList[x];
+                            label_block.style.top = ((x + 2) * 20) + 'px';
+                            label_block.style.position = 'absolute';
+                            label_block.style.left = '50%';
+                            label_block.style.transform = 'translateX(-50%)';
+                            label_block.style.textAlign = "center";
+                            venue_canvas.appendChild(label_block);
+
+                        }
+                        document.getElementById("seatsDisplay_4").appendChild(venue_canvas);
+                        document.getElementById("seatsDisplay_4").style.display = "block";
+                        document.getElementById("borderID_4").style.display = "block";
+                        document.getElementById("formRowID_4").style.display = "block";
+                        //}
+                    } else {
+                        document.getElementById("Error12").textContent = "";
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("Error12").textContent = "Network error: " + error.message;
+                });
+
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/showAvailableSeats", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.statusCode === 200) {
+                        console.log(data.Price[0])
+
+                        if (blocks.length === 0 || !blocks) {
+                            let venue_canvas_5 = document.createElement('div');
+                            venue_canvas_5.style.position = 'relative';
+                            venue_canvas_5.style.height = '50px';
+
+                            let showtitle = document.createElement('h2');
+                            showtitle.textContent = data.Price[0].showName + ":  $" + data.Price[0].price;
+                            showtitle.style.color = "black";
+                            showtitle.style.top = '20px';
+                            showtitle.style.position = 'absolute';
+                            showtitle.style.left = '50%';
+                            showtitle.style.transform = 'translateX(-50%)';
+                            showtitle.style.textAlign = "center";
+                            venue_canvas_5.appendChild(showtitle);
+
+                            document.getElementById("seatsDisplay_4").appendChild(venue_canvas_5);
+                            document.getElementById("seatsDisplay_4").style.display = "block";
+                            document.getElementById("borderID_4").style.display = "block";
+                            document.getElementById("formRowID_4").style.display = "block";
+                        }
+
+                        //document.getElementById("Error10").textContent = "";
+                        let availSeats = data.AvailableSeats;
+                        let availSeats_2 = new Array(availSeats.length);
+                        // Parse the data and prepare it to be sent to the server for file update
+
+                        if (blocks.length === 0 || !blocks) {
+                            for (let seat of availSeats) {
+                                seat.Price = data.Price[0].price;
+                            }
+                        } else {
+                            for (let seat of availSeats) {
+                                for (let x = 0; x < blocks.length; x++) {
+                                    // Split seatList into an array of seat rows
+                                    let seatListArray = blocks[x].seatList.split(',').map(row => row.trim());
+
+                                    if (seat.layoutSide === blocks[x].layoutSide && seatListArray.includes(seat.row)) {
+                                        seat.Price = blocks[x].Price;
+                                    }
+                                }
+                            }
+                        }
+
+                        // these are the labels
+                        let venue_canvas = document.createElement('div');
+                        venue_canvas.style.position = 'relative';
+
+                        let label_l = document.createElement('label');
+                        label_l.textContent = "Left Side";
+                        label_l.style.position = 'absolute';
+                        label_l.style.left = '0px';
+                        label_l.style.textAlign = "left";
+                        venue_canvas.appendChild(label_l);
+
+                        let label_c = document.createElement('label');
+                        label_c.textContent = "Center";
+                        label_c.style.position = 'absolute';
+                        label_c.style.left = '50%';
+                        label_c.style.transform = 'translateX(-50%)';
+                        label_c.style.textAlign = "center";
+                        venue_canvas.appendChild(label_c);
+
+                        let label_r = document.createElement('label');
+                        label_r.textContent = "Right Side";
+                        label_r.style.position = 'absolute';
+                        label_r.style.right = '0px';
+                        label_r.style.textAlign = "right";
+                        venue_canvas.appendChild(label_r);
+
+                        document.getElementById("seatsDisplay").appendChild(venue_canvas);
+                        document.getElementById("seatsDisplay").style.display = "block";
+                        document.getElementById("borderID_1").style.display = "block";
+                        document.getElementById("formRowID_1").style.display = "block";
+                        // they are separate
+
+                        // VENUE SEATS
+                        let venue_canvas_2 = document.createElement('div');
+                        venue_canvas_2.style.position = 'relative';
+                        let venueSeats = data.Dimentions;
+
+                        let ncL, ncC, ncR, nrT;
+                        let match = [];
+                        let nr, nc;
+                        for (let l = 0; l < 3; l++) {
+                            if (l === 0) { // sideLeft
+                                match = venueSeats[0].endRowColL.match(/^([A-Z]+)(\d+)$/);
+
+                                if (match) {
+                                    nr = parseInt(match[1].charCodeAt(0) - 64); // Letters
+                                    nc = parseInt(match[2]); // Numbers
+                                }
+                                ncL = nc;
+                                nrT = nr;
+                            } else if (l === 1) { // center
+                                match = venueSeats[0].endRowColC.match(/^([A-Z]+)(\d+)$/);
+
+                                if (match) {
+                                    nr = parseInt(match[1].charCodeAt(0) - 64); // Letters
+                                    nc = parseInt(match[2]); // Numbers
+                                }
+                                ncC = nc;
+                                nrT = Math.max(nr, nrT);
+                            } else if (l === 2) { // right
+                                match = venueSeats[0].endRowColR.match(/^([A-Z]+)(\d+)$/);
+
+                                if (match) {
+                                    nr = parseInt(match[1].charCodeAt(0) - 64); // Letters
+                                    nc = parseInt(match[2]); // Numbers
+                                }
+                                ncR = nc;
+                                nrT = Math.max(nr, nrT);
+                            }
+                        }
+                        let seatScale = (50 / ncL + ncC + ncR + 2);
+                        for (let l = 0; l < 3; l++) {
+                            if (l === 0) {
+                                match = venueSeats[0].endRowColL.match(/^([A-Z]+)(\d+)$/);
+
+                                if (match) {
+                                    nr = parseInt(match[1].charCodeAt(0) - 64); // Letters
+                                    nc = parseInt(match[2]); // Numbers
+                                }
+                            } else if (l === 1) {
+                                match = venueSeats[0].endRowColC.match(/^([A-Z]+)(\d+)$/);
+
+                                if (match) {
+                                    nr = parseInt(match[1].charCodeAt(0) - 64); // Letters
+                                    nc = parseInt(match[2]); // Numbers
+                                }
+                            } else if (l === 2) {
+                                match = venueSeats[0].endRowColR.match(/^([A-Z]+)(\d+)$/);
+
+                                if (match) {
+                                    nr = parseInt(match[1].charCodeAt(0) - 64); // Letters
+                                    nc = parseInt(match[2]); // Numbers
+                                }
+                            }
+                            for (let r = 1; r < nr + 1; r++) {
+                                for (let c = 1; c < nc + 1; c++) {
+                                    let top, left;
+
+                                    if (l === 0) {
+                                        top = (seatScale + 5) * r - (seatScale + 5);
+                                        left = seatScale * parseInt(c) - (seatScale + 5);
+                                    } else if (l === 1) {
+                                        top = (seatScale + 5) * r - (seatScale + 5);
+                                        left = seatScale * (parseInt(c) + ncL + 1) - (seatScale + 5);
+                                    } else if (l === 2) {
+                                        top = (seatScale + 5) * r - (seatScale + 5);
+                                        left = seatScale * (parseInt(c) + ncL + ncC + 2) - (seatScale + 5);
+                                    }
+                                    let seat = document.createElement('div');
+                                    seat.classList.add("seat");
+                                    seat.style.border = '1px solid red';
+                                    seat.style.top = top + 'px';
+                                    seat.style.left = left + 'px';
+                                    seat.style.height = (seatScale - 5) + 'px';
+                                    seat.style.width = (seatScale - 5) + 'px';
+
+                                    let label = document.createElement('p');
+                                    label.textContent = String.fromCharCode(r + 64) + c;
+                                    label.classList.add("label2");
+
+                                    seat.appendChild(label);
+                                    venue_canvas_2.appendChild(seat);
+                                }
+                            }
+                        }
+
+                        for (let r = 0; r < blocks.length; r++) {
+                            let top1, left1;
+                            if (blocks[r].seatList) {
+                                let result = parseString(blocks[r].seatList);
+                                let start = parseInt(result.firstLetter.charCodeAt(0) - 64) - 1;
+                                let len = result.length;
+
+                                let block = document.createElement('div');
+                                block.classList.add("block");
+                                block.style.border = '1px solid' + colorsList[r];
+                                block.style.backgroundColor = hexToRGBA(colorsList[r], 0.25);
+
+                                if (blocks[r].layoutSide === 'sideLeft') {
+                                    top1 = (seatScale + 5) * start - 4;
+                                    left1 = -7;
+                                    block.style.width = (seatScale) * ncL + 'px';
+                                } else if (blocks[r].layoutSide === 'center') {
+                                    top1 = (seatScale + 5) * start - 4;
+                                    left1 = seatScale * (ncL + 1) - 7;
+                                    block.style.width = (seatScale) * ncC + 'px';
+                                } else if (blocks[r].layoutSide === 'sideRight') {
+                                    top1 = (seatScale + 5) * start - 4;
+                                    left1 = seatScale * (ncL + ncC + 2) - 7;
+                                    block.style.width = (seatScale) * ncR + 'px';
+                                }
+
+                                block.style.top = Math.round(top1) + 'px';
+                                block.style.left = Math.round(left1) + 'px';
+                                block.style.height = ((seatScale + 3) * len) + 'px';
+
+                                venue_canvas_2.appendChild(block);
+
+                            } else {
+                                console.log('SeatList is missing for block', blocks[r].blockName);
+                            }
+                        }
+                        document.getElementById("seatsDisplay_2").style.height = (seatScale * nrT + 10) + 'px';
+                        document.getElementById("seatsDisplay_2").appendChild(venue_canvas_2);
+                        document.getElementById("seatsDisplay_2").style.display = "block";
+                        document.getElementById("borderID_2").style.display = "block";
+                        document.getElementById("formRowID_2").style.display = "block";
+
+
+                        // REMAINING SEATS (AVAILABLE TO BUY)
+                        for (let i = 0; i < availSeats.length; i++) {
+                            let availSeat = availSeats[i];
+                            let top, left;
+
+                            if (availSeat.layoutSide === 'sideLeft') {
+                                top = (seatScale + 5) * (availSeat.row.charCodeAt(0) - 64) - (seatScale + 5);
+                                left = seatScale * parseInt(availSeat.column) - (seatScale + 5);
+                            } else if (availSeat.layoutSide === 'center') {
+                                top = (seatScale + 5) * (availSeat.row.charCodeAt(0) - 64) - (seatScale + 5);
+                                left = seatScale * (parseInt(availSeat.column) + ncL + 1) - (seatScale + 5);
+                            } else if (availSeat.layoutSide === 'sideRight') {
+                                top = (seatScale + 5) * (availSeat.row.charCodeAt(0) - 64) - (seatScale + 5);
+                                left = seatScale * (parseInt(availSeat.column) + ncL + ncC + 2) - (seatScale + 5);
+                            }
+                            let seat = document.createElement('div');
+                            seat.style.border = '1px solid blue';
+                            seat.classList.add("seat");
+                            seat.style.top = top + 'px';
+                            seat.style.left = left + 'px';
+                            seat.style.height = (seatScale - 5) + 'px';
+                            seat.style.width = (seatScale - 5) + 'px';
+
+                            venue_canvas_2.appendChild(seat);
+                        }
+                        document.getElementById("seatsDisplay_2").appendChild(venue_canvas_2);
+
+
+                        // KEY DISPLAY
+                        let venue_canvas_3 = document.createElement('div');
+                        venue_canvas_3.style.position = 'relative';
+
+                        let label_remaining = document.createElement('label');
+                        label_remaining.textContent = "Remaining Seats";
+                        label_remaining.style.position = 'absolute';
+                        label_remaining.style.left = '0px';
+                        label_remaining.style.textAlign = "left";
+                        venue_canvas_3.appendChild(label_remaining);
+
+                        let label_sold = document.createElement('label');
+                        label_sold.textContent = "Sold Seats";
+                        label_sold.style.position = 'absolute';
+                        label_sold.style.right = '0px';
+                        label_sold.style.textAlign = "right";
+                        venue_canvas_3.appendChild(label_sold);
+
+                        document.getElementById("seatsDisplay_3").appendChild(venue_canvas_3);
+
+
+                        let seat = document.createElement('div');
+                        seat.style.border = '1px solid blue';
+                        seat.style.left = '115px';
+                        seat.classList.add("seat");
+
+                        venue_canvas_3.appendChild(seat);
+
+                        let seat_2 = document.createElement('div');
+                        seat_2.style.border = '1px solid red';
+                        seat_2.style.right = '75px';
+                        seat_2.classList.add("seat");
+
+                        venue_canvas_3.appendChild(seat_2);
+
+                        document.getElementById("seatsDisplay_3").appendChild(venue_canvas_3);
+
+
+                        document.getElementById("seatsDisplay_3").style.display = "block";
+                        document.getElementById("borderID_3").style.display = "block";
+                        document.getElementById("formRowID_3").style.display = "block";
+
+                    } else {
+                        document.getElementById("Error10").textContent = "";
+                        let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
+                        document.getElementById("Error10").textContent = errorMessage;
+                        document.getElementById("borderID_1").style.display = "none";
+                        document.getElementById("formRowID_1").style.display = "none";
+                        document.getElementById("borderID_2").style.display = "none";
+                        document.getElementById("formRowID_2").style.display = "none";
+                        document.getElementById("borderID_3").style.display = "none";
+                        document.getElementById("formRowID_3").style.display = "none";
+                        document.getElementById("borderID_4").style.display = "none";
+                        document.getElementById("formRowID_4").style.display = "none";
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("Error10").textContent = "Network error: " + error.message;
+                });
+
+            fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/listBlocks", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.statusCode === 200) {
+                        document.getElementById("Error10").textContent = '';
+
+                        let list = document.createElement('ul');
+
+                        for (let x = 0; x < data.body.length; x++) {
+
+                            list.style.listStyleType = 'none'; // Remove bullet points
+                            list.style.padding = '0'; // Remove default padding
+
+                            let listItem = document.createElement('li'); // Changed from 'p' to 'li'
+                            listItem.style.border = '1px solid #ddd'; // Add border to each item
+                            listItem.style.marginBottom = '10px'; // Space between items
+
+                            let blockName = document.createElement('p');
+                            blockName.textContent = "Block Name: " + data.body[x].blockName;
+
+                            let attr = document.createElement('p');
+                            attr.textContent = "Section: " + data.body[x].layoutSide;
+                            blockName.appendChild(attr);
+
+                            let attr_2 = document.createElement('p');
+                            attr_2.textContent = "Row(s): " + data.body[x].seatList;
+                            blockName.appendChild(attr_2);
+
+                            let attr_3 = document.createElement('p');
+                            attr_3.textContent = "Price: $" + parseFloat(data.body[x].Price);
+                            blockName.appendChild(attr_3);
+
+                            listItem.appendChild(blockName);
+                            list.appendChild(listItem);
+                        }
+
+                        document.getElementById("Error10").appendChild(list);
+                    } else {
+                        let responseBody = JSON.parse(data.body);
+
+                        let errorMessage = responseBody.Error || "Unknown error";
+
+                        document.getElementById("Error10").textContent = errorMessage;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("Error10").textContent = "Network error: " + error.message;
+
+                });
+
+            document.getElementById("listblockshowname").value = '';
+            document.getElementById("managerpass9").value = '';
+
+            document.getElementById("seatsDisplay").innerHTML = '';
+            document.getElementById("seatsDisplay_2").innerHTML = '';
+            document.getElementById("seatsDisplay_3").innerHTML = '';
+            document.getElementById("seatsDisplay_4").innerHTML = '';
+            document.getElementById("seatsDisplay").style.display = "none";
+            document.getElementById("seatsDisplay_2").style.display = "none";
+            document.getElementById("seatsDisplay_3").style.display = "none";
+            document.getElementById("seatsDisplay_4").style.display = "none";
+        }
 
     </script>
 
@@ -909,7 +1299,7 @@
                     </div>
                     <div class="formRow">
                         <button class="createBlockButton" onClick=CreateBlock(event)>Create Block</button>
-                        <div id="Error8"></div>
+                        <div id="Error13"></div>
                     </div>
                 </div>
                 <div class="border">
@@ -930,6 +1320,27 @@
                         <div id="Error9"></div>
                     </div>
                 </div>
+                <div id="borderID_4" class="border_2">
+                    <div id="formRowID_4" class="formRow_2">
+                        <div id="seatsDisplay_4" class="display"></div>
+                    </div>
+                </div>
+                <div id="borderID_1" class="border_2">
+                    <div id="formRowID_1" class="formRow_2">
+                        <div id="seatsDisplay" class="display"></div>
+                    </div>
+                </div>
+                <div id="borderID_2" class="border_2">
+                    <div id="formRowID_2" class="formRow_2">
+                        <div id="seatsDisplay_2" class="display"></div>
+                    </div>
+                </div>
+                <div id="borderID_3" class="border_2">
+                    <div id="formRowID_3" class="formRow_2">
+                        <div id="seatsDisplay_3" class="display"></div>
+                    </div>
+                </div>
+
                 <div class="border">
                     <div class="formRow">
                         <label class="label">Show Name:</label>
@@ -940,6 +1351,7 @@
                         <input placeholder="Enter Venue Password" id="managerpass9" type="password" class="input" />
                     </div>
                     <div class="formRow">
+                        <div id="Error12"></div>
                         <button class="listBlockButton" onClick=ListBlocks(event)>List Blocks</button>
                         <div id="Error10"></div>
                     </div>
