@@ -146,7 +146,7 @@ button:hover {
 }
 
 /* Error Messages */
-#Error, #Error2, #Error3, #Error4, #Error5, #Error6, #Error7, #Error8, #Error9, #SearchResults, #Error10, #Error11, #availableSeatsResults, #Error12 {
+#Error, #Error2, #Error3, #Error4, #Error5, #Error6, #Error7, #Error8, #Error9, #SearchResults, #Error10, #Error11, #availableSeatsResults, #Error12, #Error13 {
   color: #000000;
   margin-top: 10px;
   word-wrap: break-word; /* Breaks long words to prevent horizontal scrolling */

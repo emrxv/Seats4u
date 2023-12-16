@@ -455,7 +455,7 @@
                     document.getElementById("Error3").textContent = "Network error: " + error.message;
                 });
 
-            document.getElementById("adminPassword").value = '';
+            document.getElementById("adminpass").value = '';
         }
 
 
@@ -621,10 +621,10 @@
                     if (data.statusCode !== 200) {
                         // Parse the error message from the response body
                         let responseBody = JSON.parse(data.body);
-                        //let errorMessage = responseBody.Error;
+                        let errorMessage = JSON.parse(JSON.parse(data.body).body).Error;
 
                         // Display the error message
-                        document.getElementById("Error13").textContent = responseBody.body;
+                        document.getElementById("Error13").textContent = errorMessage;
                     }
                 })
                 .catch(error => {
@@ -659,8 +659,7 @@
                 .then(data => {
                     if (data.statusCode !== 200) {
                         // Parse the error message from the response body
-                        let responseBody = JSON.parse(data.body);
-                        let errorMessage = responseBody.Error;
+                        let errorMessage = JSON.parse(data.error.body).Error;
 
                         // Display the error message
                         document.getElementById("Error9").textContent = errorMessage;
@@ -671,6 +670,7 @@
                 .catch(error => {
                     // Handle any network errors
                     document.getElementById("Error9").textContent = "Network error: " + error.message;
+                    console.log(error);
                 });
 
             // Clear the input fields after the operation
@@ -716,7 +716,6 @@
                         document.getElementById("seatsDisplay_4").appendChild(venue_canvas);
 
                         for (let x = 0; x < blocks.length; x++) {
-                            console.log(blocks[x])
                             let label_block = document.createElement('label');
                             label_block.textContent = blocks[x].blockName + "   $" + blocks[x].Price;
                             label_block.style.color = colorsList[x];
