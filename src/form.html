@@ -533,15 +533,42 @@
                 "proceedings": 0,
                 "date": date,
                 "time": time,
-                "remainID": 0,
+                "price": price,
+                "managerPassword": showcreatepass,
+            }
+
+            payload1 = {
+                "showName": showname,
+                "venueName": venuenamecreateshow,
+                "active": 0,
+                "proceedings": 0,
+                "date": date,
+                "time": time,
                 "price": price,
                 "managerPassword": showcreatepass,
             }
 
             fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/fillSeats", {
                 method: "POST",
-                body: JSON.stringify(payload)
-            });
+                body: JSON.stringify(payload1)
+            }) 
+                .then(response => response.json())
+                .then(data => {
+                    if (data.statusCode !== 200) {
+                        // Parse the error message from the response body
+                        let responseBody = JSON.parse(data.body);
+                        let errorMessage = responseBody.Error;
+
+                        // Display the error message
+                        document.getElementById("Error41").textContent = "Seat-Creation Error: " + errorMessage;
+                    } else {
+                        document.getElementById("Error41").textContent = "All seats created successfully.";
+                    }
+                })
+                .catch(error => {
+                    // Handle any network errors
+                    document.getElementById("Error41").textContent = "Network error: " + error.message;
+                });
 
             fetch("https://j1hi3b3hbg.execute-api.us-east-1.amazonaws.com/seats4uStage/createShow", {
                 method: "POST",
@@ -1222,6 +1249,7 @@
                     </div>
                     <button class="createShowButton" onClick=CreateShow(event)>Create Show</button>
                     <div id="Error4"></div>
+                    <div id="Error41"></div>
                 </div>
                 <div class="border">
                     <div class="formRow">
