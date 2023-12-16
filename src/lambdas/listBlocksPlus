@@ -1,0 +1,56 @@
+const mysql = require('mysql');
+const db_access = require('/opt/nodejs/db_access')
+
+
+exports.handler = async (event) => {
+    // get credentials from the db_access layer (loaded separately via AWS console)
+  var pool = mysql.createPool({
+      host: db_access.config.host,
+      user: db_access.config.user,
+      password: db_access.config.password,
+      database: db_access.config.database
+  });
+  
+  let ListBlocks = () => {
+      return new Promise((resolve, reject) => {
+          pool.query(`SELECT
+                      Seats4u.Block.showName,
+                      Seats4u.Block.blockName,
+                      Seats4u.Block.layoutSide,
+                      Seats4u.Block.Price,
+                      GROUP_CONCAT(Seats4u.Block.row SEPARATOR ', ') AS seatList
+                    FROM Seats4u.Block
+                    WHERE Seats4u.Block.showName = ?
+                    GROUP BY Seats4u.Block.blockName, Seats4u.Block.layoutSide, Seats4u.Block.showName;`,
+          [event.showName], (error, rows) => {
+              if (error) { 
+                return reject({
+                    statusCode: 500,
+                    body: JSON.stringify({ Error: "Database query failed." })
+                });
+              }
+              if (rows.length === 0) {
+                return reject({
+                      statusCode: 400,
+                      body: JSON.stringify({ Error: "No blocks under this show name." })
+                  });
+              } else {
+                  return resolve(rows);
+              }
+          })
+      })
+  }
+try { 
+  const blocks = await ListBlocks()
+  
+  return {
+    statusCode: 200,
+    body: blocks
+  };
+} catch (errorResponse) {
+    return {
+        statusCode: errorResponse.statusCode || 500,
+        body: errorResponse.body || JSON.stringify({ Error: "An error occurred." })
+    };
+  };
+}

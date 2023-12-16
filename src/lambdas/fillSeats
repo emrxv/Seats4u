@@ -1,0 +1,131 @@
+const mysql = require('mysql');
+const db_access = require('/opt/nodejs/db_access')
+
+exports.handler = async (event) => {
+    // get credentials from the db_access layer (loaded separately via AWS console)
+  var pool = mysql.createPool({
+      host: db_access.config.host,
+      user: db_access.config.user,
+      password: db_access.config.password,
+      database: db_access.config.database
+  });
+  
+  function rcToSeats(data, showName) {
+  let seats = [];
+  for (let l = 0; l < 3; l++) {
+            let nr, nc;
+    
+            if (l === 0) { // sideLeft
+                nr = data.endRowColL.split("", 2)[0].charCodeAt(0) - 64;
+                nc = parseInt(data.endRowColL.split("", 2)[1]);
+            } else if (l === 1) { // center
+                nr = data.endRowColC.split("", 2)[0].charCodeAt(0) - 64;
+                nc = parseInt(data.endRowColC.split("", 2)[1]);
+            } else if (l === 2) { // sideRight
+                nr = data.endRowColR.split("", 2)[0].charCodeAt(0) - 64;
+                nc = parseInt(data.endRowColR.split("", 2)[1]);
+            }
+    
+            for (let r = 0; r < nr; r++) {
+                for (let c = 0; c < nc; c++) {
+                    let seat = {}
+                    if (l === 0) {
+                        seat = {"showName" : showName, "row" : String.fromCharCode(r + 65), "column" : c+1, "layoutSide": "sideLeft" }
+                    } else if (l === 1) {
+                        seat = {"showName" : showName, "row" : String.fromCharCode(r + 65), "column" : c+1, "layoutSide": "center" }
+                    } else if (l === 2) {
+                        seat = {"showName" : showName, "row" : String.fromCharCode(r + 65), "column" : c+1, "layoutSide": "sideRight" }
+                    }
+                    seats.push(seat);
+                }
+            }
+        }
+    return seats;
+}
+  
+  let validateManager = async () => {
+        return new Promise((resolve, reject) => {
+            if (!event.managerPassword) {
+                return reject({
+                    statusCode: 400,
+                    body: JSON.stringify({ Error: "No manager password provided." })
+                });
+            }
+            
+            pool.query("SELECT managerPassword FROM Seats4u.Venue WHERE Venue.managerPassword = ? AND Venue.venueName = ?", [event.managerPassword, event.venueName], (error, rows) => {
+                if (error) {
+                    return reject({
+                        statusCode: 500,
+                        body: JSON.stringify({ Error: "Database query failed." })
+                    });
+                }
+                if (rows.length === 1) {
+                    return resolve(true);
+                } else {
+                    return reject({
+                        statusCode: 400,
+                        body: JSON.stringify({ Error: "Incorrect manager password." })
+                    });
+                }
+            });
+        });
+    };
+  
+  let grabVenueRC = async () => {
+      return new Promise((resolve, reject) => {
+          pool.query("SELECT endRowColL, endRowColC, endRowColR FROM Seats4u.Venue WHERE venueName = ?", [event.venueName], (error, rows) => { 
+              if (error) { 
+                  return reject({
+                    statusCode: 400,
+                    body: JSON.stringify({ Error: "couldn't retrieve layouts."})
+                  });
+            }
+              return resolve(rows);
+          })
+      })
+  }
+  let FillSeats = async (seat) => {    
+      return new Promise((resolve, reject) => {
+          pool.query("INSERT INTO Seats4u.showSeatsRemaining (Seats4u.showSeatsRemaining.remainID, Seats4u.showSeatsRemaining.showName, Seats4u.showSeatsRemaining.row, Seats4u.showSeatsRemaining.column, Seats4u.showSeatsRemaining.layoutSide) VALUES (?,?,?,?,?)", [0, seat.showName, seat.row, seat.column, seat.layoutSide], (error, rows) => { 
+              if (error) { 
+                  return reject({
+                    statusCode: 400,
+                    body: JSON.stringify({ Error: "could not insert seat" + seat.showName + seat.row + seat.column + seat.layoutSide})
+                  });
+            }
+              return resolve(true);
+          })
+      })
+  }
+  
+    let fillAllSeats = async (seats) => {
+        const chunkSize = 10; // process in smaller chunks to reduce load
+        for (let i = 0; i < seats.length; i += chunkSize) {
+            const chunk = seats.slice(i, i + chunkSize);
+            const promises = chunk.map(seat => FillSeats(seat));
+            await Promise.all(promises);
+        }
+    };
+
+    try {
+        await validateManager();
+
+        const data = await grabVenueRC();
+        const seats = rcToSeats(data[0], event.showName);
+
+        await fillAllSeats(seats);
+
+        pool.end();
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: 'Seats filled successfully', seats: seats })
+        };
+    } catch (errorResponse) {
+        pool.end();
+        return {
+            statusCode: errorResponse.statusCode || 500,
+            body: errorResponse.body || JSON.stringify({ Error: "An error occurred." })
+        };
+    }
+};

@@ -1,0 +1,112 @@
+const mysql = require('mysql');
+const db_access = require('/opt/nodejs/db_access')
+
+
+exports.handler = async (event) => {
+    // get credentials from the db_access layer (loaded separately via AWS console)
+  var pool = mysql.createPool({
+      host: db_access.config.host,
+      user: db_access.config.user,
+      password: db_access.config.password,
+      database: db_access.config.database
+  });
+      let checkActiveShow = async () => {
+        return new Promise((resolve, reject) => {
+            if (!event.showName) {
+                return reject({
+                    statusCode: 400,
+                    body: JSON.stringify({ Error: "No show name provided." })
+                });
+            }
+            pool.query("SELECT active FROM Seats4u.Show WHERE showName = ?", [event.showName], (error, results) => {
+                if (error) {
+                    return reject({
+                        statusCode: 500,
+                        body: JSON.stringify({ Error: "Database query failed." })
+                    });
+                }
+                if (results.length === 0) {
+                    return reject({
+                        statusCode: 400,
+                        body: JSON.stringify({ Error: "Show not found." })
+                    });
+                }
+                if(results[0].active === 1) {
+                    return reject({
+                        statusCode: 400,
+                        body: JSON.stringify({ Error: "Show is active; cannot create block." })
+                    });
+                }
+                return resolve(true);
+            });
+        });
+    };
+   let validateManager = async () => {
+        return new Promise((resolve, reject) => {
+            if (!event.managerPassword) {
+                return reject({
+                    statusCode: 400,
+                    body: JSON.stringify({ Error: "No manager password provided." })
+                });
+            }
+            
+        pool.query("SELECT Seats4u.Venue.managerPassword FROM Seats4u.Show JOIN Seats4u.Venue ON Seats4u.Show.venueName = Seats4u.Venue.venueName WHERE Seats4u.Show.showName = ? AND Seats4u.Venue.managerPassword = ?", [event.showName, event.managerPassword], (error, rows) => {
+                if (error) {
+                    return reject({
+                        statusCode: 400,
+                        body: JSON.stringify({ Error: "Database query failed for password." })
+                    });
+                }
+                if (rows.length === 1) {
+                    return resolve(true);
+                } else {
+                    return reject({
+                        statusCode: 400,
+                        body: JSON.stringify({ Error: "Incorrect manager password." })
+                    });
+                }
+            });
+        });
+    };
+  
+  let createBlock = async (blockName,event) => {
+      return new Promise((resolve, reject) => {
+          pool.query("INSERT INTO Seats4u.Block (BlockID, showName, `blockName`, layoutSide, `row`, Price) VALUES(?,?,?,?,?,?)", [event.BlockID, event.showName, blockName, event.layoutSide, event.row, event.Price], (error, rows) => { 
+            if (error) {
+                //console.log(error)
+                return reject({
+                    statusCode: 400,
+                    body: error
+                    //body: JSON.stringify({ Error: "Database query failed inserting blocks." })
+                });
+            }
+            
+              return resolve(rows);
+          
+        })
+    })
+  }
+  
+    try {
+        
+        await checkActiveShow();
+        await validateManager();
+       
+        let results = [];
+        for (const block of event.blocks) {
+            const result = await createBlock(event.blockName, block);
+            results.push(result);
+        }
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify(results), // Convert results array to JSON
+        };
+    } catch (error) {
+        // Handle errors that occur during the operation
+        return {
+            statusCode: 500, // or appropriate error status code
+            body: JSON.stringify(error), // Convert error message to JSON
+        };
+    };
+};

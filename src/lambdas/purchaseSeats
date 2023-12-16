@@ -1,0 +1,281 @@
+const mysql = require('mysql');
+const db_access = require('/opt/nodejs/db_access');
+
+exports.handler = async (event) => {
+    var pool = mysql.createPool({
+        host: db_access.config.host,
+        user: db_access.config.user,
+        password: db_access.config.password,
+        database: db_access.config.database
+    });
+    
+let checkShowStarted = async (seat) => {
+    return new Promise((resolve, reject) => {
+        let query = "SELECT Seats4u.Show.date, Seats4u.Show.time FROM Seats4u.Show WHERE Seats4u.Show.showName = ?";
+        pool.query(query, [seat.showName], (error, results) => {
+            if (error) {
+                console.error('Error fetching show start time:', error);
+                return reject({
+                    statusCode: 500,
+                    body: JSON.stringify({ Error: "Error fetching show start time." })
+                });
+            }
+
+            if (results && results.length > 0) {
+                // Convert EST to UTC
+                let estOffset = isDST(new Date(`${results[0].date}T${results[0].time}`)) ? -4 : -5;
+                let showStartUTC = new Date(`${results[0].date}T${results[0].time}`);
+                showStartUTC.setHours(showStartUTC.getHours() + estOffset);
+
+                let nowUTC = new Date(); // Current time in UTC
+
+                if (nowUTC >= showStartUTC) {
+                    console.error('Show has already started');
+                    return reject({
+                        statusCode: 400,
+                        body: JSON.stringify({ Error: "Cannot purchase tickets. The show has already started." })
+                    });
+                } else {
+                    resolve();
+                }
+            } else {
+                return reject({
+                    statusCode: 404,
+                    body: JSON.stringify({ Error: "Show not found." })
+                });
+            }
+        });
+    });
+};
+
+function isDST(date) {
+    // Implement logic to determine if the date is in Daylight Saving Time in EST
+    // This can be complex as it varies year by year
+    // For simplicity, you might use a library like moment-timezone or manually handle common DST transition dates
+    // Returning false for now for simplicity
+    return false;
+}
+
+
+
+
+    
+let checkBlock = async (event) => {
+    return new Promise((resolve, reject) => {
+        let query = "SELECT * FROM Seats4u.Block WHERE showName = ?";
+        pool.query(query, [event.showName], (error, results) => {
+            if (error) {
+                console.error('Error executing query:', error); // Log the error
+                return reject({
+                    statusCode: 500,
+                    body: JSON.stringify({ Error: "Database query failed." })
+                });
+            }
+            if (results.length > 0) {
+                // Blocks exist for this show
+                resolve(true);
+            } else {
+                // No blocks exist for this show
+                resolve(false);
+            }
+        });
+    });
+};
+
+
+    
+      let checkActiveShow = (event) => {
+        return new Promise((resolve, reject) => {
+            if (!event.showName) {
+                return reject({
+                    statusCode: 400,
+                    body: JSON.stringify({ Error: "No show name provided." })
+                });
+            }
+
+            let query = "SELECT active FROM Seats4u.Show WHERE showName = ?";
+            pool.query(query, [event.showName], (error, results) => {
+                if (error) {
+                    return reject({
+                        statusCode: 500,
+                        body: JSON.stringify({ Error: "Database query failed." })
+                    });
+                }
+                if (results.length === 0 || results[0].active === 0) {
+                    return reject({
+                        statusCode: 400,
+                        body: JSON.stringify({ Error: "Inactive show or show not found." })
+                    });
+                }
+                resolve();
+            });
+        });
+    };
+    
+// removes the seat from showSeatsRemaining table
+    let deleteSeat = async (event) => {
+        return new Promise((resolve, reject) => {
+            pool.query(
+              "DELETE Seats4u.showSeatsRemaining FROM Seats4u.showSeatsRemaining JOIN Seats4u.Show ON Seats4u.showSeatsRemaining.showName = Seats4u.Show.showName WHERE Seats4u.showSeatsRemaining.showName=? AND Seats4u.showSeatsRemaining.`row`=? AND Seats4u.showSeatsRemaining.`column`=? AND Seats4u.showSeatsRemaining.layoutSide=?",
+                [event.showName, event.row, event.column, event.layoutSide],
+               (error, result) => {
+                    if (error) {
+                        console.error("Error deleting seat:", error);
+                        return reject({
+                            statusCode: 400,
+                            body: JSON.stringify({ Error: "Seat not found."})
+                        });
+                    }
+                    if ((result.affectedRows === 0)) {
+                        return reject({
+                            statusCode: 400,
+                            body: JSON.stringify({ Error: "Seat not found or already purchased." + event.row + event.column + event.layoutSide})
+                        });
+                        
+                    } else {
+                        return resolve({
+                            statusCode: 200,
+                            body: JSON.stringify({ message: 'Seat purchased.'})
+                        });
+                    }
+                }
+            );
+        });
+    };
+    // adds the seat to the soldSeats table after it has been deleted
+    let soldSeats = async (event) => {
+
+        return new Promise((resolve, reject) => {
+            pool.query("INSERT INTO Seats4u.soldSeats (showName, `row`, `column`, layoutSide) VALUES (?, ?, ?, ?)", [event.showName, event.row, event.column, event.layoutSide], (error, result) => {
+                    if (error) {
+                        console.error("Error marking seat in sold seats:", error);
+                        return reject({
+                            statusCode: 400,
+                            body: JSON.stringify({ Error: "Invalid seat values."})
+                        });
+                    } else {
+                        return resolve({
+                            statusCode: 200,
+                            body: JSON.stringify({ message: 'Seat has been sold.'})
+                        });
+                    }
+                }
+            );
+        });
+    };
+    // updates the proceeds in the corresponding show
+   // Updated proceedsUpdate function
+let proceedsUpdate = async (event) => {
+    return new Promise((resolve, reject) => {
+        // First, check if the row exists in the Block table
+        let checkRowQuery = "SELECT Price FROM Seats4u.Block WHERE `row` = ? AND showName = ?";
+        pool.query(checkRowQuery, [event.row, event.showName], (error, blockResults) => {
+            if (error) {
+                console.error("Error querying Block table:", error);
+                return reject({
+                    statusCode: 500,
+                    body: JSON.stringify({ Error: "Error querying Block table." })
+                });
+            }
+
+            if (blockResults.length > 0) {
+                // Row exists in Block table, use Price from Block
+                let blockPrice = blockResults[0].Price;
+                let updateProceedingsQuery = "UPDATE Seats4u.Show SET proceedings = proceedings + ? WHERE showName = ?";
+                pool.query(updateProceedingsQuery, [blockPrice, event.showName], (updateError, updateResults) => {
+                    if (updateError) {
+                        console.error("Error updating proceedings with Block price:", updateError);
+                        return reject({
+                            statusCode: 500,
+                            body: JSON.stringify({ Error: "Error updating proceedings with Block price." })
+                        });
+                    }
+                    resolve({
+                        statusCode: 200,
+                        body: JSON.stringify({ message: 'Updated proceeds with Block price successfully.', result: updateResults })
+                    });
+                });
+            } else {
+                // Row does not exist in Block table, use price from Show table
+                let getPriceQuery = "SELECT price FROM Seats4u.Show WHERE showName = ?";
+                pool.query(getPriceQuery, [event.showName], (priceError, priceResults) => {
+                    if (priceError) {
+                        console.error("Error fetching price from Show table:", priceError);
+                        return reject({
+                            statusCode: 500,
+                            body: JSON.stringify({ Error: "Error fetching price from Show table." })
+                        });
+                    }
+
+                    if (priceResults.length > 0) {
+                        let showPrice = priceResults[0].price;
+                        let updateProceedingsQuery = "UPDATE Seats4u.Show SET proceedings = proceedings + ? WHERE showName = ?";
+                        pool.query(updateProceedingsQuery, [showPrice, event.showName], (updateError, updateResults) => {
+                            if (updateError) {
+                                console.error("Error updating proceedings with Show price:", updateError);
+                                return reject({
+                                    statusCode: 500,
+                                    body: JSON.stringify({ Error: "Error updating proceedings with Show price." })
+                                });
+                            }
+                            resolve({
+                                statusCode: 200,
+                                body: JSON.stringify({ message: 'Updated proceeds with Show price successfully.', result: updateResults })
+                            });
+                        });
+                    } else {
+                        return reject({
+                            statusCode: 400,
+                            body: JSON.stringify({ Error: "Show not found." })
+                        });
+                    }
+                });
+            }
+        });
+    });
+};
+
+
+
+// Helper function for database queries
+let queryDatabase = (query, params) => {
+    return new Promise((resolve, reject) => {
+        pool.query(query, params, (error, results) => {
+            if (error) {
+                return reject(error);
+            }
+            resolve(results);
+        });
+    });
+};
+
+    
+try {
+    // First, check for active show and blocks
+     // Assuming event has the showName
+    
+    let blockExists = await checkBlock(event); // Modify checkBlock to return true/false based on block existence
+
+    for (const seat of event.seats) {
+        await checkShowStarted(seat);
+        // Delete the seat from showSeatsRemaining table and add it to soldSeats table
+        await checkActiveShow(seat);
+        await deleteSeat(seat);
+        await soldSeats(seat);
+
+        // Proceed with updating proceeds based on block existence
+        await proceedsUpdate(seat, blockExists); // Modify proceedsUpdate to accept block existence flag
+    }
+
+    const response = {
+        statusCode: 200,
+        body: JSON.stringify("Congrats on buying a seat(s). Seat is no longer available for purchase.")
+    };
+    return response;
+} catch (errorResponse) {
+    return {
+        Error: errorResponse
+    };
+}
+
+};

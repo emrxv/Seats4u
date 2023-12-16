@@ -1,0 +1,57 @@
+const mysql = require('mysql');
+const db_access = require('/opt/nodejs/db_access');
+
+exports.handler = async (event) => {
+    // Validate input
+    if (!event.showName || event.showName.trim() === '') {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ Error: "Please enter a search term." })
+        };
+    }
+
+    var pool = mysql.createPool({
+        host: db_access.config.host,
+        user: db_access.config.user,
+        password: db_access.config.password,
+        database: db_access.config.database
+    });
+
+    let searchShow = async () => {
+        return new Promise((resolve, reject) => {
+            const searchTerm = '%' + event.showName.trim() + '%';
+            pool.query("SELECT Seats4u.Show.showName, Seats4u.Venue.venueName, Seats4u.Venue.Location, Seats4u.Show.active, Seats4u.Show.date, Seats4u.Show.time, Seats4u.Show.price, (SELECT COUNT(*) FROM Seats4u.showSeatsRemaining WHERE showName = Seats4u.Show.showName) as remainingSeats FROM Seats4u.Show JOIN Seats4u.Venue ON Seats4u.Show.venueName = Seats4u.Venue.venueName WHERE (Seats4u.Show.showName LIKE ? OR Seats4u.Show.venueName LIKE ?) AND active=1", [searchTerm, searchTerm], (error, rows) => {
+                if (error) {
+                    return reject({
+                        statusCode: 500,
+                        body: JSON.stringify({ Error: "Database query failed." })
+                    });
+                }
+
+                let isSoldOut = false;
+                if (rows.length > 0 && rows[0].remainingSeats === 0) {
+                    isSoldOut = true;
+                }
+
+                return resolve({ shows: rows, soldOut: isSoldOut });
+            });
+        });
+    };
+
+    try {
+        const result = await searchShow();
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                constants: result.shows,
+                soldOut: result.soldOut
+            })
+        };
+    } catch (errorResponse) {
+        return {
+            statusCode: errorResponse.statusCode || 500,
+            body: errorResponse.body || JSON.stringify({ Error: "An error occurred." })
+        };
+    }
+};
